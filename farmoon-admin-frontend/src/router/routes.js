@@ -5,84 +5,103 @@ export const constantRoutes = [
   {
     path: "/",
     component: MainLayout,
-    children: [{
-      path: "",
-      name: "index",
-      component: () => import("pages/IndexPage.vue"),
-    }],
+    redirect: "/home",
+    children: [
+      {
+        path: "home",
+        name: "home",
+        component: () => import("pages/IndexPage.vue"),
+        meta: {
+          title: "主页",
+          icon: "home"
+        },
+      }
+    ],
   },
   {
-    path: "/login",
+    path: "/",
     component: FullLayout,
     hidden: true,
-    children: [{
-      path: "",
-      name: "login",
-      component: () => import("pages/LoginPage.vue")
-    }],
+    children: [
+      {
+        path: "login",
+        name: "login",
+        component: () => import("pages/LoginPage.vue")
+      },
+      {
+        path: "register",
+        name: "register",
+        component: () => import("pages/RegisterPage.vue")
+      }
+    ],
   },
   {
-    path: "/register",
-    component: FullLayout,
-    hidden: true,
-    children: [{
-      path: "",
-      name: "register",
-      component: () => import("pages/RegisterPage.vue")
-    }],
-  },
-  {
-    path: "/test2",
-    component: MainLayout,
+    path: "/level1",
+    name: "level1",
     meta: {
-      title: "测试",
+      title: "level1",
+      icon: "home"
     },
+    redirect: "/level1/level1-1",
+    component: MainLayout,
     children: [{
-      path: "admin",
-      name: "test2Admin",
+      path: "level1-1",
+      name: "level1-1",
+      redirect: "/level1/level1-1/level1-1-1",
       component: () => import("pages/test/AdminPage.vue"),
       meta: {
-        title: "admin测试",
+        title: "level1-1",
         icon: "mdi-home",
-      }
+      },
+      children: [
+        {
+          path: "level1-1-1",
+          name: "level1-1-1",
+          component: () => import("pages/test/AdminPage.vue"),
+          meta: {
+            title: "level1-1-1",
+            icon: "mdi-home",
+          },
+        },
+        {
+          path: "level1-1-2",
+          name: "level1-1-2",
+          component: () => import("pages/test/AdminPage.vue"),
+          meta: {
+            title: "level1-1-2",
+            icon: "mdi-home",
+          },
+        }
+      ]
     }, {
-      path: "editor",
-      name: "test2Editor",
+      path: "level1-2",
+      name: "level1-2",
       component: () => import("pages/test/EditorPage.vue"),
       meta: {
-        title: "editor测试",
+        title: "level1-2",
         icon: "mdi-home",
       }
-    }],
+    }
+    ],
   },
 ];
 
 export const asyncRoutes = [
   {
-    path: "/test",
+    path: "/user-manage",
     component: MainLayout,
-    meta: {
-      title: "测试",
-    },
-    children: [{
-      path: "admin",
-      name: "testAdmin",
-      component: () => import("pages/test/AdminPage.vue"),
-      meta: {
-        title: "admin测试",
-        icon: "mdi-home",
-        roles: ["admin"]
+    children: [
+      {
+        path: "",
+        name: "users",
+        component: () => import("pages/user/IndexPage.vue"),
+        meta: {
+          title: "用户管理",
+          icon: "mdi-account-group",
+          roles: ["admin", "editor"]
+        }
       }
-    }, {
-      path: "editor",
-      name: "testEditor",
-      component: () => import("pages/test/EditorPage.vue"),
-      meta: {
-        title: "editor测试",
-        icon: "mdi-home",
-        roles: ["editor"]
-      }
-    }],
+    ]
   },
   // Always leave this as last one,
   // but you can also remove it

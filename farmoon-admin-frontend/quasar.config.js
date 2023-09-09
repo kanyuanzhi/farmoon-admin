@@ -41,13 +41,14 @@ module.exports = configure(function (ctx) {
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
-      // 'ionicons-v4',
-      // 'mdi-v5',
-      // 'fontawesome-v6',
-      // 'eva-icons',
-      // 'themify',
-      // 'line-awesome',
+      "ionicons-v4",
+      "mdi-v5",
+      "fontawesome-v6",
+      "eva-icons",
+      "themify",
+      "line-awesome",
       // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
+      "bootstrap-icons",
 
       "roboto-font", // optional, you are not bound to it
       "material-icons", // optional, you are not bound to it
@@ -72,7 +73,7 @@ module.exports = configure(function (ctx) {
       env: {
         API: ctx.dev
           // 测试代理地址
-          ? "http://127.0.0.1:10000/farmoon-api/v1/"
+          ? "http://localhost:10000/farmoon-api/v1/"
           // 正式代理地址
           : "http://81.68.159.232:10000/farmoon-api/v1/"
       },

@@ -2,6 +2,7 @@ package boot
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/global"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/utils"
@@ -20,7 +21,7 @@ func Boot() {
 		Handler: Router(),
 	}
 	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("【farmoon-admin】listen:%s\n", err)
 		}
 	}()
