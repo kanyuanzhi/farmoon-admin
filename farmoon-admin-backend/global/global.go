@@ -12,9 +12,9 @@ var (
 )
 
 type FXModel struct {
-	Id        uint      `json:"id" gorm:"comment:id;primarykey;autoIncrement;"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Id        uint      `json:"id" gorm:"comment:id;primaryKey;autoIncrement;"`
+	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 	Sort      uint      `json:"sort" gorm:"comment:排序;default:1;"`
 	Memo      string    `json:"memo" gorm:"comment:备注描述;type:text;"`
 }

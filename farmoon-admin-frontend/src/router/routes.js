@@ -88,11 +88,11 @@ export const constantRoutes = [
 
 export const asyncRoutes = [
   {
-    path: "/user-manage",
+    path: "/user",
     component: MainLayout,
     children: [
       {
-        path: "",
+        path: "manage",
         name: "users",
         component: () => import("pages/user/IndexPage.vue"),
         meta: {

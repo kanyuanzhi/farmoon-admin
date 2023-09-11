@@ -16,5 +16,9 @@ func Router() *gin.Engine {
 	publicGroup := apiV1.Group("/public")
 	v1.InitPublicRouter(publicGroup)
 
+	// 需要验证的路由
+	privateGroup := apiV1.Group("/private")
+	v1.InitPrivateRouter(privateGroup)
+
 	return router
 }

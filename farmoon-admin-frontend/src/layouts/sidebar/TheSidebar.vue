@@ -25,7 +25,7 @@ import SidebarHeader from "layouts/sidebar/SidebarHeader.vue";
 
 const appStore = useAppStore();
 const permissionStore = usePermissionStore();
-console.log(permissionStore.routes);
+// console.log(permissionStore.routes);
 
 </script>
 

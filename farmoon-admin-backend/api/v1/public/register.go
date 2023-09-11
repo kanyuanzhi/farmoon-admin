@@ -14,6 +14,7 @@ type RegisterApi struct{}
 func (api *RegisterApi) Register(c *gin.Context) {
 	var registerRequest request.Register
 	if err := request.ShouldBindJSON(c, &registerRequest); err != nil {
+		response.ErrorMessage(c, err.Error())
 		return
 	}
 	if registerRequest.RepeatPassword != registerRequest.Password {
@@ -26,9 +27,17 @@ func (api *RegisterApi) Register(c *gin.Context) {
 	}
 	passwordEncoded, _ := utils.EncodeBcrypt(registerRequest.Password)
 
+	imageData, err := utils.LoadDefaultProfilePhoto()
+	if err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
 	user := model.SysUser{
 		Username: registerRequest.Username,
 		Password: passwordEncoded,
+		Avatar:   imageData,
+		Gender:   "N", // 未知性别
 	}
 
 	if result := global.FXDb.Create(&user); result.Error != nil {

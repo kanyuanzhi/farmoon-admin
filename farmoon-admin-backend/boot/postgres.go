@@ -25,7 +25,6 @@ func Postgres() *gorm.DB {
 			slog.Error("Get postgres instance failed")
 			return nil
 		}
-
 		sqlDB.SetMaxOpenConns(10) // 最大打开连接数
 		sqlDB.SetMaxIdleConns(5)  // 最大闲置连接数
 		return db

@@ -79,7 +79,7 @@ const showRepeatPassword = ref(false);
 const rules = {
   username: {
     required: helpers.withMessage("用户名不能为空！", required),
-    minLength: helpers.withMessage("用户名长度不能小于4！", minLength(4))
+    minLength: helpers.withMessage("用户名长度不能小于6！", minLength(6))
   },
   password: {
     required: helpers.withMessage("密码不能为空！", required),

@@ -1,6 +1,7 @@
 package public
 
 import (
+	"encoding/base64"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/global"
@@ -15,6 +16,7 @@ type LoginApi struct{}
 func (api *LoginApi) Login(c *gin.Context) {
 	var loginRequest request.Login
 	if err := request.ShouldBindJSON(c, &loginRequest); err != nil {
+		response.ErrorMessage(c, err.Error())
 		return
 	}
 
@@ -35,7 +37,7 @@ func (api *LoginApi) Login(c *gin.Context) {
 	}
 
 	loginResponse := response.Login{
-		Avatar:   user.Avatar,
+		Avatar:   base64.StdEncoding.EncodeToString(user.Avatar),
 		Username: user.Username,
 		Nickname: user.Nickname,
 		RealName: user.RealName,
