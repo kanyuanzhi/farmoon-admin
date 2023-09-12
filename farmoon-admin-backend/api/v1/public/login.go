@@ -2,7 +2,6 @@ package public
 
 import (
 	"encoding/base64"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/global"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/model"
@@ -31,21 +30,23 @@ func (api *LoginApi) Login(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(user.Roles)
 	if user.Roles == nil {
 		user.Roles = []string{}
 	}
 
 	loginResponse := response.Login{
-		Avatar:   base64.StdEncoding.EncodeToString(user.Avatar),
-		Username: user.Username,
-		Nickname: user.Nickname,
-		RealName: user.RealName,
-		Gender:   user.Gender,
-		Mobile:   user.Mobile,
-		Email:    user.Email,
-		Roles:    user.Roles,
-		Token:    utils.CreateToken(user.Username),
+		UserInfo: model.UserInfo{
+			Id:       user.Id,
+			Username: user.Username,
+			Nickname: user.Nickname,
+			RealName: user.RealName,
+			Avatar:   "data:image/png;base64," + base64.StdEncoding.EncodeToString(user.Avatar),
+			Gender:   user.Gender,
+			Mobile:   user.Mobile,
+			Email:    user.Email,
+			Roles:    user.Roles,
+		},
+		Token: utils.CreateToken(user.Username),
 	}
 
 	response.SuccessMessageData(c, loginResponse, "登录成功")

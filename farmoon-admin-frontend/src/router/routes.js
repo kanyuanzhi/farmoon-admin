@@ -93,12 +93,22 @@ export const asyncRoutes = [
     children: [
       {
         path: "manage",
-        name: "users",
+        name: "userManager",
         component: () => import("pages/user/IndexPage.vue"),
         meta: {
           title: "用户管理",
           icon: "mdi-account-group",
-          roles: ["admin", "editor"]
+          roles: ["admin"]
+        }
+      }, {
+        path: "profile",
+        name: "userProfile",
+        hidden: true,
+        component: () => import("pages/user/profile/IndexPage.vue"),
+        meta: {
+          title: "我的资料",
+          icon: "o_account_circle",
+          roles: ["admin", "editor", "visitor"]
         }
       }
     ]

@@ -11,6 +11,8 @@ func InitPrivateRouter(routerGroup *gin.RouterGroup) {
 	routerGroup.GET("user/count", userApi.Count)
 	routerGroup.PUT("user/update", userApi.Update)
 	routerGroup.DELETE("user/delete", userApi.Delete)
+	routerGroup.PUT("user/update-roles", userApi.UpdateRoles)
 	routerGroup.PUT("user/update-password", userApi.UpdatePassword)
+	routerGroup.POST("user/update-avatar", userApi.UpdateAvatar)
 	routerGroup.POST("user/add", userApi.Add)
 }

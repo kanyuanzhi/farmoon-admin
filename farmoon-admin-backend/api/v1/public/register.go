@@ -7,6 +7,7 @@ import (
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/model/request"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/model/response"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/utils"
+	"github.com/lib/pq"
 )
 
 type RegisterApi struct{}
@@ -38,6 +39,7 @@ func (api *RegisterApi) Register(c *gin.Context) {
 		Password: passwordEncoded,
 		Avatar:   imageData,
 		Gender:   "N", // 未知性别
+		Roles:    make(pq.StringArray, 0),
 	}
 
 	if result := global.FXDb.Create(&user); result.Error != nil {

@@ -10,6 +10,12 @@ export const genderMap = {
   "N": "未知",
 }
 
+export const genderReverseMap = {
+  "男": "M",
+  "女": "F",
+  "未知": "N",
+}
+
 export const roleColorMap = {
   "admin": "green",
   "editor": "orange-9",

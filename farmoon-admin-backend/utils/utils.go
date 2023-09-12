@@ -3,6 +3,7 @@ package utils
 import (
 	"github.com/spf13/viper"
 	"log"
+	"os"
 )
 
 // Reload 解析配置文件configName到target
@@ -22,4 +23,13 @@ func Reload(configName string, target interface{}) {
 		log.Println("解析配置文件失败:", err)
 		return
 	}
+}
+
+func LoadDefaultProfilePhoto() ([]byte, error) {
+	imagePath := "./assets/default_profile_photo.jpg"
+	imageData, err := os.ReadFile(imagePath)
+	if err != nil {
+		return nil, err
+	}
+	return imageData, nil
 }

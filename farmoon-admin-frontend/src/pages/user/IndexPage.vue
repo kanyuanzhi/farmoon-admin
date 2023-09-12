@@ -67,8 +67,8 @@
               {{ props.row.index }}
             </q-td>
             <q-td key="avatar" :props="props">
-              <q-avatar size="md">
-                <img :src="'data:image/jpeg;base64,'+props.row.avatar" alt=""/>
+              <q-avatar size="md" class="cursor-pointer">
+                <img :src="props.row.avatar" alt="" @click="photoUploader.show(props.row.id, props.row)"/>
               </q-avatar>
             </q-td>
             <q-td key="username" :props="props">
@@ -117,9 +117,8 @@
               <q-badge v-for="role in props.row.roles.sort()" :key="role" class="q-ml-xs" :color="roleColorMap[role]">
                 {{ role }}
               </q-badge>
-              <!--              {{ props.row.roles?.sort().join(",") }}-->
               <q-popup-edit v-model="props.row.roles" buttons label-set="确认" label-cancel="取消" v-slot="scope"
-                            @update:model-value="updateRow(props.row)">
+                            @update:model-value="updateRoles(props.row)">
                 <q-option-group
                   :options="roleOptions"
                   type="checkbox"
@@ -129,7 +128,7 @@
             </q-td>
             <q-td key="operate" :props="props">
               <q-btn dense round flat icon="key" size="md" color="primary" @click="updatePassword(props.row)"/>
-              <q-btn class="q-ml-sm" dense round flat icon="mdi-delete" size="md" color="grey-7"
+              <q-btn class="q-ml-sm" dense round flat icon="mdi-delete" size="md" color="grey-6"
                      @click="deleteRows([props.row])"/>
             </q-td>
           </q-tr>
@@ -139,6 +138,7 @@
     <q-dialog v-model="addUserDialogShown" persistent>
       <AddUserDialog @add-success="onAddUserSuccess"/>
     </q-dialog>
+    <PhotoUploader ref="photoUploader" @update-success="onUpdateAvatarSuccess"/>
   </q-page>
 </template>
 
@@ -149,6 +149,7 @@ import {Dialog, Notify} from "quasar";
 import {remove} from "lodash";
 import AddUserDialog from "pages/user/AddUserDialog.vue";
 import {genderOptions, genderMap, roleOptions, roleColorMap} from "pages/user/user";
+import PhotoUploader from "pages/user/profile/PhotoUploader.vue";
 
 const addUserDialogShown = ref(false)
 
@@ -199,6 +200,8 @@ const isDeleteInBatch = ref(false)
 const getPaginationString = (firstRowIndex, endRowIndex, totalRowsNumber) => {
   return `${firstRowIndex}-${endRowIndex}（${totalRowsNumber}）`
 }
+
+const photoUploader = ref(null)
 
 onMounted(async () => {
   loading.value = true
@@ -255,11 +258,13 @@ const getRows = async (pageIndex, pageSize) => {
   }
   rows.value.forEach((item, index) => {
     item.index = index + startRow.value
+    if (item.roles === null) {
+      item.roles = []
+    }
   })
 }
 
 const updateRow = async (row) => {
-  console.log(row)
   try {
     const newData = {
       id: row.id,
@@ -268,9 +273,20 @@ const updateRow = async (row) => {
       gender: row.gender,
       mobile: row.mobile,
       email: row.email,
-      roles: row.roles,
     }
     const {message} = await putAPI("private/user/update", newData)
+    Notify.create({
+      message: message,
+      type: "positive"
+    })
+  } catch (e) {
+    console.log(e.toString())
+  }
+}
+
+const updateRoles = async (row) => {
+  try {
+    const {message} = await putAPI("private/user/update-roles", {id: row.id, roles: row.roles})
     Notify.create({
       message: message,
       type: "positive"
@@ -326,9 +342,9 @@ const deleteRows = async (selectedRows) => {
     focus: "none"
   }).onOk(async () => {
     try {
-      const ids = selectedRows.map((val) => val.id)
+      const ids = selectedRows.map((row) => row.id)
       const {message} = await deleteAPI("/private/user/delete", {ids: ids})
-      remove(rows.value, (val) => ids.includes(val.id))
+      remove(rows.value, (row) => ids.includes(row.id))
       Notify.create({
         message: message,
         type: "positive"
@@ -347,6 +363,10 @@ const deleteCancel = () => {
 const onAddUserSuccess = (user) => {
   addUserDialogShown.value = false
   onRequest(table.value)
+}
+
+const onUpdateAvatarSuccess = (userId, avatarUrl, fromObj) => {
+  fromObj.avatar = avatarUrl
 }
 </script>
 

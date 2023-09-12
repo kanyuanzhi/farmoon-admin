@@ -5,13 +5,15 @@
   >
     <SidebarHeader/>
     <q-list class="rounded-borders">
-      <SidebarItem
-        v-for="route in permissionStore.routes"
-        :key="route.path"
-        :item="route"
-        :level="0"
-        :basePath="route.path"
-      />
+      <q-scroll-area style="height: calc(100vh - 50px)">
+        <SidebarItem
+          v-for="route in permissionStore.routes"
+          :key="route.path"
+          :item="route"
+          :level="0"
+          :basePath="route.path"
+        />
+      </q-scroll-area>
     </q-list>
   </q-drawer>
 </template>

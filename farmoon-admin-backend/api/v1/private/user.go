@@ -8,6 +8,7 @@ import (
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/model/request"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/model/response"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/utils"
+	"strconv"
 	"strings"
 )
 
@@ -65,7 +66,7 @@ func (api *UserApi) List(c *gin.Context) {
 	for _, user := range users {
 		usersInfo = append(usersInfo, model.UserInfo{
 			Id:       user.Id,
-			Avatar:   base64.StdEncoding.EncodeToString(user.Avatar),
+			Avatar:   "data:image/png;base64," + base64.StdEncoding.EncodeToString(user.Avatar),
 			Username: user.Username,
 			Nickname: user.Nickname,
 			RealName: user.RealName,
@@ -83,6 +84,7 @@ func (api *UserApi) List(c *gin.Context) {
 	response.SuccessData(c, listUsersResponse)
 }
 
+// 仅更新基本字段
 func (api *UserApi) Update(c *gin.Context) {
 	var updateUserRequest request.UpdateUser
 	if err := request.ShouldBindJSON(c, &updateUserRequest); err != nil {
@@ -99,10 +101,32 @@ func (api *UserApi) Update(c *gin.Context) {
 		Gender:   updateUserRequest.Gender,
 		Mobile:   updateUserRequest.Mobile,
 		Email:    updateUserRequest.Email,
-		Roles:    updateUserRequest.Roles,
 	}
 
-	if err := global.FXDb.Model(&user).Omit("id").Updates(user).Error; err != nil {
+	if err := global.FXDb.Model(&user).Select("nickname", "real_name", "gender", "mobile", "email").
+		Updates(user).Error; err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	response.SuccessMessage(c, "更新成功")
+}
+
+func (api *UserApi) UpdateRoles(c *gin.Context) {
+	var updateRolesRequest request.UpdateRoles
+	if err := request.ShouldBindJSON(c, &updateRolesRequest); err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	user := model.SysUser{
+		FXModel: global.FXModel{
+			Id: updateRolesRequest.Id,
+		},
+		Roles: updateRolesRequest.Roles,
+	}
+
+	if err := global.FXDb.Model(&user).Update("roles", user.Roles).Error; err != nil {
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -155,6 +179,45 @@ func (api *UserApi) UpdatePassword(c *gin.Context) {
 	response.SuccessMessage(c, "更新密码成功")
 }
 
+func (api *UserApi) UpdateAvatar(c *gin.Context) {
+	file, err := c.FormFile("img")
+	if err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	// Open the uploaded file
+	src, err := file.Open()
+	if err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+	defer src.Close()
+
+	// Read the file content into a byte slice
+	fileData := make([]byte, file.Size)
+	_, err = src.Read(fileData)
+	if err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+	idStr := c.PostForm("id")
+
+	id, _ := strconv.Atoi(idStr)
+	user := model.SysUser{
+		FXModel: global.FXModel{Id: uint(id)},
+
+		Avatar: fileData,
+	}
+
+	if err := global.FXDb.Model(&user).Update("avatar", user.Avatar).Error; err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	response.SuccessMessage(c, "更新头像成功")
+}
+
 func (api *UserApi) Add(c *gin.Context) {
 	var addUserRequest request.AddUser
 	if err := request.ShouldBindJSON(c, &addUserRequest); err != nil {
@@ -198,7 +261,7 @@ func (api *UserApi) Add(c *gin.Context) {
 			Username: user.Username,
 			Nickname: user.Nickname,
 			RealName: user.RealName,
-			Avatar:   base64.StdEncoding.EncodeToString(user.Avatar),
+			Avatar:   "data:image/png;base64," + base64.StdEncoding.EncodeToString(user.Avatar),
 			Gender:   user.Gender,
 			Mobile:   user.Mobile,
 			Email:    user.Email,
