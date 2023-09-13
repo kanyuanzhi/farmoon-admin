@@ -1,140 +1,138 @@
 <template>
-  <q-page>
-    <div class="q-pa-md">
-      <q-table
-        ref="table"
-        :rows="rows"
-        :columns="columns"
-        row-key="id"
-        flat
-        :loading="loading"
-        v-model:pagination="pagination"
-        :selection="isDeleteInBatch? 'multiple' : 'none'"
-        v-model:selected="selectedRows"
-        :selected-rows-label="getSelectedString"
-        @request="onRequest"
-        :pagination-label="getPaginationString"
-        rows-per-page-label="每页显示："
-        :filter="filter"
-      >
-        <template v-slot:header-selection="scope">
-          <q-checkbox dense v-model="scope.selected"/>
+  <q-page class="q-pa-md">
+    <q-table
+      ref="table"
+      :rows="rows"
+      :columns="columns"
+      row-key="id"
+      flat
+      :loading="loading"
+      v-model:pagination="pagination"
+      :selection="isDeleteInBatch? 'multiple' : 'none'"
+      v-model:selected="selectedRows"
+      :selected-rows-label="getSelectedString"
+      @request="onRequest"
+      :pagination-label="getPaginationString"
+      rows-per-page-label="每页显示："
+      :filter="filter"
+    >
+      <template v-slot:header-selection="scope">
+        <q-checkbox dense v-model="scope.selected"/>
+      </template>
+      <template v-slot:top="scope">
+        <q-btn label="添加用户" color="primary" @click="addUserDialogShown=true"/>
+        <q-btn v-if="!isDeleteInBatch" class="q-ml-sm" label="批量删除用户" color="grey-6"
+               @click.prevent="isDeleteInBatch=true"/>
+        <template v-else>
+          <q-btn outline class="q-ml-sm" label="取消删除" color="grey-6" @click="deleteCancel"/>
+          <q-btn outline class="q-ml-sm" label="确认删除" color="negative"
+                 @click="deleteRows(selectedRows)"/>
         </template>
-        <template v-slot:top="scope">
-          <q-btn label="添加用户" color="primary" @click="addUserDialogShown=true"/>
-          <q-btn v-if="!isDeleteInBatch" class="q-ml-sm" label="批量删除用户" color="grey-6"
-                 @click.prevent="isDeleteInBatch=true"/>
-          <template v-else>
-            <q-btn outline class="q-ml-sm" label="取消删除" color="grey-6" @click="deleteCancel"/>
-            <q-btn outline class="q-ml-sm" label="确认删除" color="negative"
-                   @click="deleteRows(selectedRows)"/>
-          </template>
-          <q-space/>
+        <q-space/>
 
-          <q-toggle v-model="enableGenderFilter" @update:model-value="onRequest(scope)"></q-toggle>
-          <q-select
-            dense
-            v-model="genderFilter"
-            :options="genderOptions"
-            label="筛选性别"
-            style="width: 90px"
-            :disable="!enableGenderFilter"
-            @update:model-value="onRequest(scope)"
-          />
-          <q-toggle v-model="enableRolesFilter" @update:model-value="onRequest(scope)"></q-toggle>
-          <q-select
-            dense
-            v-model="rolesFilter"
-            multiple
-            :options="roleOptions"
-            label="筛选权限"
-            style="width: 160px"
-            :disable="!enableRolesFilter"
-            @update:model-value="onRequest(scope)"
-          />
-          <q-input dense class="q-ml-md" debounce="300" v-model="filter" placeholder="模糊搜索">
-            <template v-slot:append>
-              <q-icon name="search"/>
-            </template>
-          </q-input>
-        </template>
-        <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td v-if="isDeleteInBatch" key="select">
-              <q-checkbox dense v-model="props.selected"/>
-            </q-td>
-            <q-td key="index" :props="props">
-              {{ props.row.index }}
-            </q-td>
-            <q-td key="avatar" :props="props">
-              <q-avatar size="md" class="cursor-pointer">
-                <img :src="props.row.avatar" alt="" @click="photoUploader.show(props.row.id, props.row)"/>
-              </q-avatar>
-            </q-td>
-            <q-td key="username" :props="props">
-              {{ props.row.username }}
-            </q-td>
-            <q-td key="nickname" :props="props">
-              {{ props.row.nickname }}
-              <q-popup-edit v-model="props.row.nickname" buttons label-set="确认" label-cancel="取消" v-slot="scope"
-                            @update:model-value="updateRow(props.row)">
-                <q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set"/>
-              </q-popup-edit>
-            </q-td>
-            <q-td key="realName" :props="props">
-              {{ props.row.realName }}
-              <q-popup-edit v-model="props.row.realName" buttons label-set="确认" label-cancel="取消" v-slot="scope"
-                            @update:model-value="updateRow(props.row)">
-                <q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set"/>
-              </q-popup-edit>
-            </q-td>
-            <q-td key="gender" :props="props">
-              {{ genderMap[props.row.gender] }}
-              <q-popup-edit v-model="props.row.gender" buttons label-set="确认" label-cancel="取消" v-slot="scope"
-                            @update:model-value="updateRow(props.row)">
-                <q-option-group
-                  :options="genderOptions"
-                  type="radio"
-                  v-model="scope.value"
-                />
-              </q-popup-edit>
-            </q-td>
-            <q-td key="mobile" :props="props">
-              {{ props.row.mobile }}
-              <q-popup-edit v-model="props.row.mobile" buttons label-set="确认" label-cancel="取消" v-slot="scope"
-                            @update:model-value="updateRow(props.row)">
-                <q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set"/>
-              </q-popup-edit>
-            </q-td>
-            <q-td key="email" :props="props">
-              {{ props.row.email }}
-              <q-popup-edit v-model="props.row.email" buttons label-set="确认" label-cancel="取消" v-slot="scope"
-                            @update:model-value="updateRow(props.row)">
-                <q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set"/>
-              </q-popup-edit>
-            </q-td>
-            <q-td key="roles" :props="props">
-              <q-badge v-for="role in props.row.roles.sort()" :key="role" class="q-ml-xs" :color="roleColorMap[role]">
-                {{ role }}
-              </q-badge>
-              <q-popup-edit v-model="props.row.roles" buttons label-set="确认" label-cancel="取消" v-slot="scope"
-                            @update:model-value="updateRoles(props.row)">
-                <q-option-group
-                  :options="roleOptions"
-                  type="checkbox"
-                  v-model="scope.value"
-                />
-              </q-popup-edit>
-            </q-td>
-            <q-td key="operate" :props="props">
-              <q-btn dense round flat icon="key" size="md" color="primary" @click="updatePassword(props.row)"/>
-              <q-btn class="q-ml-sm" dense round flat icon="mdi-delete" size="md" color="grey-6"
-                     @click="deleteRows([props.row])"/>
-            </q-td>
-          </q-tr>
-        </template>
-      </q-table>
-    </div>
+        <q-toggle v-model="enableGenderFilter" @update:model-value="onRequest(scope)"></q-toggle>
+        <q-select
+          dense
+          v-model="genderFilter"
+          :options="genderOptions"
+          label="筛选性别"
+          style="width: 90px"
+          :disable="!enableGenderFilter"
+          @update:model-value="onRequest(scope)"
+        />
+        <q-toggle v-model="enableRolesFilter" @update:model-value="onRequest(scope)"></q-toggle>
+        <q-select
+          dense
+          v-model="rolesFilter"
+          multiple
+          :options="roleOptions"
+          label="筛选权限"
+          style="width: 160px"
+          :disable="!enableRolesFilter"
+          @update:model-value="onRequest(scope)"
+        />
+        <q-input dense class="q-ml-md" debounce="300" v-model="filter" placeholder="模糊搜索">
+          <template v-slot:append>
+            <q-icon name="search"/>
+          </template>
+        </q-input>
+      </template>
+      <template v-slot:body="props">
+        <q-tr :props="props">
+          <q-td v-if="isDeleteInBatch" key="select">
+            <q-checkbox dense v-model="props.selected"/>
+          </q-td>
+          <q-td key="index" :props="props">
+            {{ props.row.index }}
+          </q-td>
+          <q-td key="avatar" :props="props">
+            <q-avatar size="md" class="cursor-pointer">
+              <img :src="props.row.avatar" alt="" @click="photoUploader.show(props.row.id, props.row)"/>
+            </q-avatar>
+          </q-td>
+          <q-td key="username" :props="props">
+            {{ props.row.username }}
+          </q-td>
+          <q-td key="nickname" :props="props">
+            {{ props.row.nickname }}
+            <q-popup-edit v-model="props.row.nickname" buttons label-set="确认" label-cancel="取消" v-slot="scope"
+                          @update:model-value="updateRow(props.row)">
+              <q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set"/>
+            </q-popup-edit>
+          </q-td>
+          <q-td key="realName" :props="props">
+            {{ props.row.realName }}
+            <q-popup-edit v-model="props.row.realName" buttons label-set="确认" label-cancel="取消" v-slot="scope"
+                          @update:model-value="updateRow(props.row)">
+              <q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set"/>
+            </q-popup-edit>
+          </q-td>
+          <q-td key="gender" :props="props">
+            {{ genderMap[props.row.gender] }}
+            <q-popup-edit v-model="props.row.gender" buttons label-set="确认" label-cancel="取消" v-slot="scope"
+                          @update:model-value="updateRow(props.row)">
+              <q-option-group
+                :options="genderOptions"
+                type="radio"
+                v-model="scope.value"
+              />
+            </q-popup-edit>
+          </q-td>
+          <q-td key="mobile" :props="props">
+            {{ props.row.mobile }}
+            <q-popup-edit v-model="props.row.mobile" buttons label-set="确认" label-cancel="取消" v-slot="scope"
+                          @update:model-value="updateRow(props.row)">
+              <q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set"/>
+            </q-popup-edit>
+          </q-td>
+          <q-td key="email" :props="props">
+            {{ props.row.email }}
+            <q-popup-edit v-model="props.row.email" buttons label-set="确认" label-cancel="取消" v-slot="scope"
+                          @update:model-value="updateRow(props.row)">
+              <q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set"/>
+            </q-popup-edit>
+          </q-td>
+          <q-td key="roles" :props="props">
+            <q-badge v-for="role in props.row.roles.sort()" :key="role" class="q-ml-xs" :color="roleColorMap[role]">
+              {{ role }}
+            </q-badge>
+            <q-popup-edit v-model="props.row.roles" buttons label-set="确认" label-cancel="取消" v-slot="scope"
+                          @update:model-value="updateRoles(props.row)">
+              <q-option-group
+                :options="roleOptions"
+                type="checkbox"
+                v-model="scope.value"
+              />
+            </q-popup-edit>
+          </q-td>
+          <q-td key="operate" :props="props">
+            <q-btn dense round flat icon="key" size="md" color="primary" @click="updatePassword(props.row)"/>
+            <q-btn class="q-ml-sm" dense round flat icon="mdi-delete" size="md" color="grey-6"
+                   @click="deleteRows([props.row])"/>
+          </q-td>
+        </q-tr>
+      </template>
+    </q-table>
     <q-dialog v-model="addUserDialogShown" persistent>
       <AddUserDialog @add-success="onAddUserSuccess"/>
     </q-dialog>
@@ -275,10 +273,7 @@ const updateRow = async (row) => {
       email: row.email,
     }
     const {message} = await putAPI("private/user/update", newData)
-    Notify.create({
-      message: message,
-      type: "positive"
-    })
+    Notify.create(message)
   } catch (e) {
     console.log(e.toString())
   }
@@ -287,10 +282,7 @@ const updateRow = async (row) => {
 const updateRoles = async (row) => {
   try {
     const {message} = await putAPI("private/user/update-roles", {id: row.id, roles: row.roles})
-    Notify.create({
-      message: message,
-      type: "positive"
-    })
+    Notify.create(message)
   } catch (e) {
     console.log(e.toString())
   }
@@ -316,10 +308,7 @@ const updatePassword = async (row) => {
     }
     try {
       const {message} = await putAPI("private/user/update-password", {id: row.id, password: data})
-      Notify.create({
-        message: message,
-        type: "positive"
-      })
+      Notify.create(message)
     } catch (e) {
       console.log(e.toString())
     }
@@ -345,10 +334,7 @@ const deleteRows = async (selectedRows) => {
       const ids = selectedRows.map((row) => row.id)
       const {message} = await deleteAPI("/private/user/delete", {ids: ids})
       remove(rows.value, (row) => ids.includes(row.id))
-      Notify.create({
-        message: message,
-        type: "positive"
-      })
+      Notify.create(message)
     } catch (e) {
       console.log(e.toString())
     }

@@ -44,12 +44,12 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
-import { required, helpers } from "@vuelidate/validators";
+import {ref, watch} from "vue";
+import {required, helpers} from "@vuelidate/validators";
 import useVuelidate from "@vuelidate/core";
-import { Notify } from "quasar";
-import { useUserStore } from "stores/user";
-import { useRoute, useRouter } from "vue-router";
+import {Notify} from "quasar";
+import {useUserStore} from "stores/user";
+import {useRoute, useRouter} from "vue-router";
 
 const userStore = useUserStore();
 
@@ -96,7 +96,7 @@ watch(() => route,
       otherQuery.value = getOtherQuery(query);
     }
   },
-  { immediate: true });
+  {immediate: true});
 const onSubmit = async () => {
   const valid = await $v.value.$validate();
   if (valid) {
@@ -105,10 +105,7 @@ const onSubmit = async () => {
       password: password.value
     });
     if (ok) {
-      Notify.create({
-        message: "登录成功！",
-        type: "positive",
-      });
+      Notify.create("登录成功！");
       await router.push({
         path: redirect.value || "/",
         query: otherQuery.value

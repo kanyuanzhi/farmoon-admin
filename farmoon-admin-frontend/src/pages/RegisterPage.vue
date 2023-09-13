@@ -107,10 +107,7 @@ const onSubmit = async () => {
         password: password.value,
         repeatPassword: repeatPassword.value
       });
-      Notify.create({
-        message: "注册成功，请登录",
-        type: "positive",
-      });
+      Notify.create( "注册成功，请登录");
       await router.push("/login");
     } else {
       Notify.create({
