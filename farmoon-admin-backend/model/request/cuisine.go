@@ -1,0 +1,28 @@
+package request
+
+import "github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/model"
+
+type ListCuisines struct {
+}
+
+type UpdateCuisineName struct {
+	Id   uint   `json:"id"`
+	Name string `json:"name"`
+}
+
+type UpdateCuisineUnDeletable struct {
+	Id          uint `json:"id"`
+	UnDeletable bool `json:"unDeletable"`
+}
+
+type UpdateCuisinesSort struct {
+	Cuisines []model.CuisineInfo `json:"cuisines"`
+}
+
+type DeleteCuisine struct {
+	Id uint `json:"id"`
+}
+
+type AddCuisine struct {
+	Name string `json:"name"`
+}

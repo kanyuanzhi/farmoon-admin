@@ -113,6 +113,46 @@ export const asyncRoutes = [
       }
     ]
   },
+  {
+    path: "/dish",
+    name: "dish",
+    meta: {
+      title: "菜谱管理",
+      icon: "home"
+    },
+    redirect: "/dish/display",
+    component: MainLayout,
+    children: [
+      {
+        path: "display",
+        name: "dishDisplay",
+        component: () => import("pages/user/IndexPage.vue"),
+        meta: {
+          title: "菜谱浏览",
+          icon: "mdi-account-group",
+          roles: ["admin", "editor"]
+        }
+      }, {
+        path: "edit",
+        name: "dishEdit",
+        component: () => import("pages/user/profile/IndexPage.vue"),
+        meta: {
+          title: "菜谱制作",
+          icon: "o_account_circle",
+          roles: ["admin", "editor"]
+        }
+      }, {
+        path: "cuisine",
+        name: "dishCuisine",
+        component: () => import("pages/dish/cuisine/IndexPage.vue"),
+        meta: {
+          title: "菜系管理",
+          icon: "o_account_circle",
+          roles: ["admin", "editor"]
+        }
+      }
+    ]
+  },
   // Always leave this as last one,
   // but you can also remove it
   {

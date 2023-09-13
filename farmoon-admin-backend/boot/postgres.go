@@ -33,6 +33,8 @@ func Postgres() *gorm.DB {
 
 var migrateList = []interface{}{
 	model.SysUser{},
+	model.SysDish{},
+	model.SysCuisine{},
 }
 
 func InitDb() error {

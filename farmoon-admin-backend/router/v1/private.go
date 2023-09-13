@@ -6,7 +6,7 @@ import (
 )
 
 func InitPrivateRouter(routerGroup *gin.RouterGroup) {
-	userApi := private.UserApi{}
+	userApi := &private.UserApi{}
 	routerGroup.GET("user/list", userApi.List)
 	routerGroup.GET("user/count", userApi.Count)
 	routerGroup.PUT("user/update", userApi.Update)
@@ -15,4 +15,12 @@ func InitPrivateRouter(routerGroup *gin.RouterGroup) {
 	routerGroup.PUT("user/update-password", userApi.UpdatePassword)
 	routerGroup.POST("user/update-avatar", userApi.UpdateAvatar)
 	routerGroup.POST("user/add", userApi.Add)
+
+	cuisineApi := &private.CuisineApi{}
+	routerGroup.GET("cuisine/list", cuisineApi.List)
+	routerGroup.PUT("cuisine/update-name", cuisineApi.UpdateName)
+	routerGroup.PUT("cuisine/update-unDeletable", cuisineApi.UpdateUnDeletable)
+	routerGroup.PUT("cuisine/update-sort", cuisineApi.UpdateSort)
+	routerGroup.DELETE("cuisine/delete", cuisineApi.Delete)
+	routerGroup.POST("cuisine/add", cuisineApi.Add)
 }
