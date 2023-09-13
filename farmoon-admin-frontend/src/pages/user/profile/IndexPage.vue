@@ -126,10 +126,7 @@ const onSave = async () => {
     userStore.setGender(genderEdited.value)
     userStore.setMobile(mobileEdited.value)
     userStore.setEmail(emailEdited.value)
-    Notify.create({
-      message: message,
-      type: "positive"
-    })
+    Notify.create(message)
   } catch (e) {
     console.log(e)
   }

@@ -106,10 +106,7 @@ const onSubmit = async () => {
         email: email.value,
         roles: roles.value.map(role => role.value),
       });
-      Notify.create({
-        message: message,
-        type: "positive",
-      });
+      Notify.create(message);
       emit("addSuccess", data)
     } else {
       Notify.create({

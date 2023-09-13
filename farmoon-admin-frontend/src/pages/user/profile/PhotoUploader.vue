@@ -39,15 +39,12 @@ const cropSuccess = (imgDataUrl, field) => {
 const cropUploadSuccess = (jsonData, field) => {
   const {code, message} = jsonData
   if (code === 1) {
-    Notify.create({
-      message: message,
-      type: "positive"
-    })
+    Notify.create(message)
     emit("updateSuccess", id.value, avatarUrl, from.value)
   } else {
     Notify.create({
       message: message,
-      type: "error"
+      type: "negative"
     })
   }
 }
@@ -55,7 +52,7 @@ const cropUploadSuccess = (jsonData, field) => {
 const cropUploadFail = (status, field) => {
   Notify.create({
     message: status,
-    type: "error"
+    type: "negative"
   })
 }
 
