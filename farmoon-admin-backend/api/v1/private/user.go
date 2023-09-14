@@ -135,14 +135,14 @@ func (api *UserApi) UpdateRoles(c *gin.Context) {
 }
 
 func (api *UserApi) Delete(c *gin.Context) {
-	var deleteUserRequest request.DeleteUsers
-	if err := request.ShouldBindJSON(c, &deleteUserRequest); err != nil {
+	var deleteUsersRequest request.DeleteUsers
+	if err := request.ShouldBindJSON(c, &deleteUsersRequest); err != nil {
 		response.ErrorMessage(c, err.Error())
 		return
 	}
 
 	var users []model.SysUser
-	for _, id := range deleteUserRequest.Ids {
+	for _, id := range deleteUsersRequest.Ids {
 		users = append(users, model.SysUser{
 			FXModel: global.FXModel{
 				Id: id,
