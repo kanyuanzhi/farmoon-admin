@@ -135,7 +135,7 @@ export const asyncRoutes = [
       }, {
         path: "edit",
         name: "dishEdit",
-        component: () => import("pages/user/profile/IndexPage.vue"),
+        component: () => import("pages/dish/edit/IndexPage.vue"),
         meta: {
           title: "菜谱制作",
           icon: "o_account_circle",

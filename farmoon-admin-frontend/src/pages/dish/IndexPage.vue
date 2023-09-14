@@ -20,7 +20,7 @@
         <q-checkbox dense v-model="scope.selected"/>
       </template>
       <template v-slot:top="scope">
-        <q-btn label="制作菜谱" color="primary" @click="addUserDialogShown=true"/>
+        <q-btn label="添加菜谱" color="primary"/>
         <q-btn v-if="!isDeleteInBatch" class="q-ml-sm" label="批量删除菜谱" color="grey-6"
                @click.prevent="isDeleteInBatch=true"/>
         <template v-else>
@@ -116,13 +116,16 @@ import {deleteAPI, getAPI, putAPI} from "src/api";
 import {Dialog, Notify} from "quasar";
 import {remove} from "lodash";
 import DishImageUploader from "pages/dish/components/DishImageUploader.vue";
-import {getCuisineInfo} from "pages/dish/dish";
+import {getCuisineInfo} from "pages/dish/index";
 
 const cuisineOptions = ref([])
 const cuisineMap = ref({})
 
 const enableCuisineFilter = ref(false)
 const cuisineFilter = ref([])
+
+const filter = ref("")
+const isDeleteInBatch = ref(false)
 
 const loading = ref(false)
 
@@ -156,28 +159,21 @@ const pagination = ref({
   rowsNumber: 10
 })
 
-const filter = ref("")
-const isDeleteInBatch = ref(false)
-
 const getPaginationString = (firstRowIndex, endRowIndex, totalRowsNumber) => {
   return `${firstRowIndex}-${endRowIndex}（${totalRowsNumber}）`
 }
 
 const dishImageUploader = ref(null)
 
-onBeforeMount(async () => {
+onMounted(async () => {
+  loading.value = true
   const {options, map} = await getCuisineInfo()
   cuisineOptions.value = options
   cuisineMap.value = map
-})
-
-onMounted(async () => {
-  loading.value = true
   await getRowsNumber()
   await getRows(defaultPageIndex, defaultPageSize)
   loading.value = false
 })
-
 
 const onRequest = async (props) => {
   loading.value = true

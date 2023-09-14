@@ -4,7 +4,7 @@
       label="上传菜品图片（100KB以内）"
       :url=url
       style="max-width: 300px"
-      color="teal-6"
+      color="primary"
       accept=".jpg,.png"
       :max-file-size="100*1024"
       :form-fields="[{name:'id', value:id}]"
