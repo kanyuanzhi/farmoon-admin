@@ -62,7 +62,7 @@ import useVuelidate from "@vuelidate/core";
 import {useRouter} from "vue-router";
 import {postAPI} from "src/api";
 import {Notify} from "quasar";
-import {genderOptions, genderMap, roleOptions} from "pages/user/user";
+import {genderOptions, genderMap, roleOptions} from "pages/user";
 
 const emit = defineEmits(["addSuccess"])
 

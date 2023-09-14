@@ -88,11 +88,11 @@
 
 <script setup>
 import {useUserStore} from "stores/user";
-import {genderMap, genderOptions, roleColorMap} from "pages/user/user";
+import {genderMap, genderOptions, roleColorMap} from "pages/user";
 import {ref} from "vue";
 import {putAPI} from "src/api";
 import {Notify} from "quasar";
-import PhotoUploader from "pages/user/profile/PhotoUploader.vue";
+import PhotoUploader from "pages/user/components/PhotoUploader.vue";
 
 const userStore = useUserStore();
 
