@@ -1,10 +1,11 @@
 <template>
   <q-card bordered flat class="my-card" style="width: 100%">
-    <q-card-section class="text-center q-py-sm bg-teal-6 text-white">
-      <div class="text-subtitle1">
-        步骤
+    <q-card-section class="text-center q-py-sm">
+      <div class="text-subtitle2">
+        步骤列表
       </div>
     </q-card-section>
+    <q-separator/>
     <q-card-section>
       <q-list class="scrollable-container" ref="stepList" bordered separator>
         <q-slide-item v-for="item in newSteps" :key="item.key" class="text-black" @right="onDeleteCouple(item)"
@@ -68,16 +69,16 @@
 
 <script setup>
 
-import { onMounted, onUnmounted, ref, watch } from "vue";
+import {onMounted, onUnmounted, ref, watch} from "vue";
 import Sortable from "sortablejs";
-import { useDishStore } from "stores/dish";
+import {useDishStore} from "stores/dish";
 import TheIngredientDialog from "pages/dish/edit/components/dialogs/TheIngredientDialog.vue";
 import TheFireDialog from "pages/dish/edit/components/dialogs/TheFireDialog.vue";
 import TheStirFryDialog from "pages/dish/edit/components/dialogs/TheStirFryDialog.vue";
 import TheWaterDialog from "pages/dish/edit/components/dialogs/TheWaterDialog.vue";
 import TheOilDialog from "pages/dish/edit/components/dialogs/TheOilDialog.vue";
 import TheSeasoningDialog from "pages/dish/edit/components/dialogs/TheSeasoningDialog.vue";
-import { random, range, sampleSize } from "lodash";
+import {random, range, sampleSize} from "lodash";
 
 const dishStore = useDishStore();
 
@@ -244,7 +245,7 @@ const onDeleteCouple = (item) => {
 //.my-card {
 //  height: calc(100vh - 50px - 32px);
 //}
-.scrollable-container{
+.scrollable-container {
   height: calc(100vh - 50px - 32px - 32px - 44px - 2px);
   overflow-y: auto;
 }

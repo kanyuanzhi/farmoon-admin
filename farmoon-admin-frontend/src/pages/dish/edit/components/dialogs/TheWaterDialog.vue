@@ -6,8 +6,10 @@
           <div class="text-h6">添加纯净水</div>
         </q-card-section>
         <q-card-section>
-          <NumberSelect ref="numberSelect" label="分量" unit="克" :min="5" :max="150" :step="5"
-                        :number="weight" @update="(v)=>weight=v"/>
+<!--          <NumberSelect ref="numberSelect" label="分量" unit="克" :min="5" :max="150" :step="5"-->
+<!--                        :number="weight" @update="(v)=>weight=v"/>-->
+          <NumberInput ref="numberInput" label="分量" unit="克" :number="weight" @update="(v)=>weight=v"/>
+
         </q-card-section>
         <q-card-actions align="right">
           <q-btn v-close-popup flat color="teal-6">取消</q-btn>
@@ -22,6 +24,7 @@
 import { ref } from "vue";
 import NumberSelect from "pages/dish/edit/components/select/NumberSelect.vue";
 import { newWaterStep } from "pages/dish/edit/components/dialogs/newStep";
+import NumberInput from "pages/dish/edit/components/select/NumberInput.vue";
 
 const emits = defineEmits(["update", "submit"]);
 

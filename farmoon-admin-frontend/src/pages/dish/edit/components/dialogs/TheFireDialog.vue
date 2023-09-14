@@ -48,9 +48,11 @@
             </q-item-section>
           </q-item>
 
-          <NumberSelect ref="numberSelect" label="温度监测" unit="摄氏度（℃）" :min="0" :max="220" :step="5"
-                        :number="targetTemperature" :disable="judgeType===3||judgeType === 4"
-                        @update="(v)=>targetTemperature=v"/>
+          <!--          <NumberSelect ref="numberSelect" label="温度监测" unit="摄氏度（℃）" :min="0" :max="220" :step="5"-->
+          <!--                        :number="targetTemperature" :disable="judgeType===3||judgeType === 4"-->
+          <!--                        @update="(v)=>targetTemperature=v"/>-->
+          <NumberInput ref="numberInput" label="温度监测" unit="摄氏度（℃）" :number="targetTemperature"
+                       :disable="judgeType===3||judgeType === 4" @update="(v)=>targetTemperature=v"/>
 
           <!--          <DurationSelect ref="durationSelect" :duration="duration"-->
           <!--                          :disable="judgeType===1||judgeType===2||judgeType === 4"-->
@@ -66,10 +68,11 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import {ref} from "vue";
 import DurationSelect from "pages/dish/edit/components/select/DurationSelect.vue";
 import NumberSelect from "pages/dish/edit/components/select/NumberSelect.vue";
-import { newHeatStep } from "pages/dish/edit/components/dialogs/newStep";
+import {newHeatStep} from "pages/dish/edit/components/dialogs/newStep";
+import NumberInput from "pages/dish/edit/components/select/NumberInput.vue";
 
 
 const emits = defineEmits(["update", "submit"]);

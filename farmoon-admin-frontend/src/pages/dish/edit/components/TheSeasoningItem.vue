@@ -2,16 +2,19 @@
   <div class="row">
     <TheSeasoningSelect class="col" ref="theSeasoningSelect" :seasoning="seasoning"
                         :seasoning-options="seasoningOptions" @update="onSeasoningUpdate"/>
-    <NumberSelect class="col" label="分量" unit="克" :number="seasoning.weight" :min="minWeight" :max="maxWeight"
-                  :step="weightStep" @update="onWeightUpdate"/>
+    <!--    <NumberSelect class="col" label="分量" unit="克" :number="seasoning.weight" :min="minWeight" :max="maxWeight"-->
+    <!--                  :step="weightStep" @update="onWeightUpdate"/>-->
+    <NumberInput ref="numberInput" label="分量" unit="克" :number="seasoning.weight" @update="onWeightUpdate"/>
+
     <q-btn size="xs" flat icon="clear" text-color="grey-8" @click="emits('delete')"></q-btn>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import {onMounted, ref} from "vue";
 import TheSeasoningSelect from "pages/dish/edit/components/select/TheSeasoningSelect.vue";
 import NumberSelect from "pages/dish/edit/components/select/NumberSelect.vue";
+import NumberInput from "pages/dish/edit/components/select/NumberInput.vue";
 
 const props = defineProps(["seasoning", "seasoningOptions", "index"]);
 const emits = defineEmits(["delete", "seasoning-select", "weight-select"]);

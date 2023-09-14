@@ -8,7 +8,8 @@
         <GearSlider ref="gearSlider" :gear="gear" label="档位" color="amber-10" :gear-min="0" :gear-max="5"
                     @update="(v)=>{gear=v}"/>
 
-        <DurationSelect ref="durationSelect" :duration="duration" @update="(v)=>{duration=v}"/>
+<!--        <DurationSelect ref="durationSelect" :duration="duration" @update="(v)=>{duration=v}"/>-->
+        <DurationInput ref="durationSelect" :duration="duration" @update="(v)=>{duration=v}"/>
       </q-card-section>
       <q-card-actions align="right">
         <q-btn v-close-popup flat color="teal-6">取消</q-btn>
@@ -19,11 +20,12 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import {ref} from "vue";
 import GearSlider from "pages/dish/edit/components/select/GearSlider.vue";
 import DurationSelect from "pages/dish/edit/components/select/DurationSelect.vue";
-import { newStirFryStep } from "pages/dish/edit/components/dialogs/newStep";
-import { useDishStore } from "stores/dish";
+import {newStirFryStep} from "pages/dish/edit/components/dialogs/newStep";
+import {useDishStore} from "stores/dish";
+import DurationInput from "pages/dish/edit/components/select/DurationInput.vue";
 
 const dishStore = useDishStore();
 

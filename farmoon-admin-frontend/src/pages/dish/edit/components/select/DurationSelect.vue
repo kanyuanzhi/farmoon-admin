@@ -42,10 +42,7 @@
 
 <script setup>
 import { ref, watch } from "vue";
-import { useQuasar } from "quasar";
 import { floor } from "lodash";
-
-const $q = useQuasar();
 
 const props = defineProps(["duration", "disable"]);
 const emits = defineEmits(["update"]);

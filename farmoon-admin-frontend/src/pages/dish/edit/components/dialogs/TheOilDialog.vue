@@ -6,8 +6,10 @@
           <div class="text-h6">添加食用油</div>
         </q-card-section>
         <q-card-section>
-          <NumberSelect ref="numberSelect" label="分量" unit="克" :min="1" :max="100" :step="1"
-                        :number="weight" @update="(v)=>weight=v"/>
+          <!--          <NumberSelect ref="numberSelect" label="分量" unit="克" :min="1" :max="100" :step="1"-->
+          <!--                        :number="weight" @update="(v)=>weight=v"/>-->
+          <NumberInput ref="numberInput" label="分量" unit="克" :number="weight" @update="(v)=>weight=v"/>
+
         </q-card-section>
 
         <q-card-actions align="right">
@@ -20,9 +22,10 @@
 </template>
 
 <script setup>
-import { onUnmounted, ref } from "vue";
+import {onUnmounted, ref} from "vue";
 import NumberSelect from "pages/dish/edit/components/select/NumberSelect.vue";
-import { newOilStep } from "pages/dish/edit/components/dialogs/newStep";
+import {newOilStep} from "pages/dish/edit/components/dialogs/newStep";
+import NumberInput from "pages/dish/edit/components/select/NumberInput.vue";
 
 const emits = defineEmits(["update", "submit"]);
 

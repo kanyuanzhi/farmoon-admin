@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-dialog v-model="shown" @hide="onHide" position="top">
+    <q-dialog v-model="shown" @hide="onHide">
       <q-card style="width: 400px" class="q-mt-md">
         <q-card-section class="bg-teal-6 text-white q-py-sm">
           <div class="text-h6">添加食材</div>
@@ -40,8 +40,9 @@
             </q-item-section>
           </q-item>
 
-          <NumberSelect ref="numberSelect" label="分量" unit="克" :min="0" :max="500" :step="5"
-                        :number="weight" @update="(v)=>weight=v"/>
+          <!--          <NumberSelect ref="numberSelect" label="分量" unit="克" :min="0" :max="500" :step="5"-->
+          <!--                        :number="weight" @update="(v)=>weight=v"/>-->
+          <NumberInput ref="numberInput" label="分量" unit="克" :number="weight" @update="(v)=>weight=v"/>
 
           <SlotRadio ref="slotRadio" :slotNumber="slotNumber" label="菜盒" :slot-count="4" @update="(v)=>slotNumber=v"/>
         </q-card-section>
@@ -57,14 +58,15 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import {ref} from "vue";
 import TheIngredientNameSelectionDialog from "pages/dish/edit/components/dialogs/TheIngredientNameSelectionDialog.vue";
 import TheIngredientShapeSelectionDialog
   from "pages/dish/edit/components/dialogs/TheIngredientShapeSelectionDialog.vue";
 import SlotRadio from "pages/dish/edit/components/SlotRadio.vue";
 import NumberSelect from "pages/dish/edit/components/select/NumberSelect.vue";
-import { Notify } from "quasar";
-import { newIngredientStep } from "pages/dish/edit/components/dialogs/newStep";
+import {Notify} from "quasar";
+import {newIngredientStep} from "pages/dish/edit/components/dialogs/newStep";
+import NumberInput from "pages/dish/edit/components/select/NumberInput.vue";
 
 const emits = defineEmits(["update", "submit"]);
 

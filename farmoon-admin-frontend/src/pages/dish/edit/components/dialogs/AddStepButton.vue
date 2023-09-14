@@ -1,5 +1,5 @@
 <template>
-  <q-btn unelevated :color="color" :size="size" style="width: 100px;padding-top: 13px">
+  <q-btn unelevated :color="color" :size="size" style="width: 80px;padding-top: 13px">
     <div class="column items-center no-wrap">
       <q-icon :name="icon"/>
       <div class="text-center">
