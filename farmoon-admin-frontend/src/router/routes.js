@@ -126,7 +126,7 @@ export const asyncRoutes = [
       {
         path: "display",
         name: "dishDisplay",
-        component: () => import("pages/user/IndexPage.vue"),
+        component: () => import("pages/dish/IndexPage.vue"),
         meta: {
           title: "菜谱浏览",
           icon: "mdi-account-group",

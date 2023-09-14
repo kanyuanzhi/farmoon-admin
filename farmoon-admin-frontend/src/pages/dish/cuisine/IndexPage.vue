@@ -31,10 +31,10 @@
               />
             </td>
             <td class="text-center">
-              <q-btn class="q-ml-sm" dense round flat icon="mdi-delete" size="md" color="grey-6"
+              <q-btn dense round flat icon="mdi-delete" size="sm" color="grey-6"
                      :disable="cuisine.unDeletable"
                      @click="deleteCuisine(cuisine.id, index)"/>
-              <q-btn dense class="drag-item" round flat icon="drag_indicator" size="md" color="primary"/>
+              <q-btn dense class="drag-item q-ml-sm" round flat icon="drag_indicator" size="sm" color="primary"/>
             </td>
           </tr>
           </tbody>

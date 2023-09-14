@@ -23,4 +23,11 @@ func InitPrivateRouter(routerGroup *gin.RouterGroup) {
 	routerGroup.PUT("cuisine/update-sort", cuisineApi.UpdateSort)
 	routerGroup.DELETE("cuisine/delete", cuisineApi.Delete)
 	routerGroup.POST("cuisine/add", cuisineApi.Add)
+
+	dishApi := &private.DishApi{}
+	routerGroup.GET("dish/list", dishApi.List)
+	routerGroup.GET("dish/count", dishApi.Count)
+	routerGroup.PUT("dish/update", dishApi.Update)
+	routerGroup.DELETE("dish/delete", dishApi.Delete)
+	routerGroup.POST("dish/update-image", dishApi.UpdateImage)
 }

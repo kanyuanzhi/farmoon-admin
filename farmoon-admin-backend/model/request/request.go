@@ -6,6 +6,7 @@ import (
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/global"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/model"
 	"gorm.io/gorm"
+	"strconv"
 )
 
 func ShouldBindJSON(c *gin.Context, obj interface{}) error {
@@ -61,6 +62,26 @@ func GenerateUserQueryCondition(filter string, enableGenderFilter bool, genderFi
 		likeParam := "%" + filter + "%"
 		filterDb = filterDb.Where("username LIKE ? or nickname LIKE ? or real_name LIKE ? or mobile LIKE ? or email LIKE ?",
 			likeParam, likeParam, likeParam, likeParam, likeParam)
+	}
+
+	return filterDb, nil
+}
+
+func GenerateDishQueryCondition(filter string, enableCuisineFilter bool, cuisineFilter []string) (*gorm.DB, error) {
+	filterDb := global.FXDb.Model(&model.SysDish{})
+
+	if enableCuisineFilter {
+		var cuisineFilterUint []uint
+		for _, cuisine := range cuisineFilter {
+			cuisineId, _ := strconv.ParseUint(cuisine, 10, 32)
+			cuisineFilterUint = append(cuisineFilterUint, uint(cuisineId))
+		}
+		filterDb = filterDb.Where("cuisine in ?", cuisineFilterUint)
+	}
+
+	if filter != "" {
+		likeParam := "%" + filter + "%"
+		filterDb = filterDb.Where("name LIKE ?", likeParam)
 	}
 
 	return filterDb, nil
