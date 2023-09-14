@@ -10,6 +10,7 @@
         :header-inset-level="level"
         :to="resolvePath(onlyOneChild.path)"
         hide-expand-icon
+        exact-active-class="bg-grey-4"
       >
       </q-expansion-item>
     </template>
@@ -20,6 +21,7 @@
         :icon="item.meta.icon"
         :label="item.meta.title"
         :header-inset-level="level"
+        :default-opened="route.fullPath.includes(resolvePath(item.path))"
       >
         <SidebarItem
           v-for="item in item.children"
@@ -35,8 +37,12 @@
 <script setup>
 import path from "path-browserify";
 import {ref} from "vue";
+import {useRoute} from "vue-router";
 
 const props = defineProps(["item", "basePath", "level"])
+
+const defaultOpened = ref(false)
+const route = useRoute()
 
 const onlyOneChild = ref(null)
 const hasOneShowingChild = (children = [], parent) => {
@@ -77,7 +83,7 @@ const isExternal = (path) => {
 </script>
 
 <style lang="scss" scoped>
-:deep(.q-item__section--avatar){
+:deep(.q-item__section--avatar) {
   min-width: 40px;
 }
 </style>

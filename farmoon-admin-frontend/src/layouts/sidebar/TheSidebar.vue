@@ -3,7 +3,7 @@
     v-model="appStore.sidebarOpened"
     bordered
   >
-    <SidebarHeader/>
+    <TheSidebarHeader/>
     <q-list class="rounded-borders">
       <q-scroll-area style="height: calc(100vh - 50px)">
         <SidebarItem
@@ -23,7 +23,7 @@
 import SidebarItem from "layouts/sidebar/SidebarItem.vue";
 import {usePermissionStore} from "stores/permission";
 import {useAppStore} from "stores/app";
-import SidebarHeader from "layouts/sidebar/SidebarHeader.vue";
+import TheSidebarHeader from "layouts/sidebar/TheSidebarHeader.vue";
 
 const appStore = useAppStore();
 const permissionStore = usePermissionStore();
