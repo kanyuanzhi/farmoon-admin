@@ -145,17 +145,18 @@ import {onMounted, ref} from "vue";
 import {deleteAPI, getAPI, putAPI} from "src/api";
 import {Dialog, Notify} from "quasar";
 import {remove} from "lodash";
-import AddUserDialog from "pages/user/AddUserDialog.vue";
-import {genderOptions, genderMap, roleOptions, roleColorMap} from "pages/user/user";
-import PhotoUploader from "pages/user/profile/PhotoUploader.vue";
-
-const addUserDialogShown = ref(false)
+import AddUserDialog from "pages/user/components/AddUserDialog.vue";
+import PhotoUploader from "pages/user/components/PhotoUploader.vue";
+import {genderOptions, genderMap, roleOptions, roleColorMap} from "pages/user/index";
 
 const enableGenderFilter = ref(false)
 const genderFilter = ref(null)
 
 const enableRolesFilter = ref(false)
 const rolesFilter = ref([])
+
+const filter = ref("")
+const isDeleteInBatch = ref(false)
 
 const loading = ref(false)
 
@@ -192,13 +193,11 @@ const pagination = ref({
   rowsNumber: 10
 })
 
-const filter = ref("")
-const isDeleteInBatch = ref(false)
-
 const getPaginationString = (firstRowIndex, endRowIndex, totalRowsNumber) => {
   return `${firstRowIndex}-${endRowIndex}（${totalRowsNumber}）`
 }
 
+const addUserDialogShown = ref(false)
 const photoUploader = ref(null)
 
 onMounted(async () => {
@@ -207,7 +206,6 @@ onMounted(async () => {
   await getRows(defaultPageIndex, defaultPageSize)
   loading.value = false
 })
-
 
 const onRequest = async (props) => {
   loading.value = true
@@ -224,8 +222,7 @@ const onRequest = async (props) => {
 }
 
 const getRowsNumber = async () => {
-  const {data} = await getAPI("/private/user/count",
-    {
+  const {data} = await getAPI("/private/user/count", {
       filter: filter.value.trim(),
       enableGenderFilter: enableGenderFilter.value,
       genderFilter: genderFilter.value === null ? "" : genderFilter.value.value,
