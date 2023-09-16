@@ -10,9 +10,9 @@
         <q-separator vertical/>
         <q-btn color="teal-6" label="恢复" @click="dishStore.resetEditingDish()"/>
         <q-separator vertical/>
-        <q-btn color="teal-6" label="清空" @click="dishStore.newEditingDish()"/>
-        <q-separator vertical/>
-        <q-btn color="teal-6" label="删除" @click="theDeleteDialog.show()"/>
+        <q-btn color="teal-6" label="清空" @click="dishStore.clearEditingDish()"/>
+<!--        <q-separator vertical/>-->
+<!--        <q-btn color="teal-6" label="删除" @click="theDeleteDialog.show()"/>-->
       </q-btn-group>
     </q-card-section>
     <TheSaveDialog ref="theSaveDialog"/>

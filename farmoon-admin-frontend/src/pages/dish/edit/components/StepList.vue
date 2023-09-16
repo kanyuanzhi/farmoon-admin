@@ -2,7 +2,7 @@
   <q-card bordered flat class="my-card" style="width: 100%">
     <q-card-section class="text-center q-py-sm">
       <div class="text-subtitle2">
-        步骤列表
+        步骤列表{{ dishStore.editingDish.name? " - " + dishStore.editingDish.name : ""}}
       </div>
     </q-card-section>
     <q-separator/>

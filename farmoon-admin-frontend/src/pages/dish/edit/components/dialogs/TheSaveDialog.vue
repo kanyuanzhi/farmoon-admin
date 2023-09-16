@@ -10,10 +10,10 @@
             <q-item-section avatar>名称</q-item-section>
             <q-item-section>
               <q-input
-                v-model="newName"
-                filled
-                dense
-                autofocus
+                  v-model="newName"
+                  filled
+                  dense
+                  autofocus
               >
               </q-input>
             </q-item-section>
@@ -22,12 +22,12 @@
             <q-item-section avatar>菜系</q-item-section>
             <q-item-section>
               <q-select
-                dense
-                filled
-                v-model="newCuisine"
-                :options="cuisineOptions"
-                options-cover
-                stack-label
+                  dense
+                  filled
+                  v-model="cuisine"
+                  :options="cuisineOptions"
+                  options-cover
+                  stack-label
               >
               </q-select>
             </q-item-section>
@@ -54,76 +54,84 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { Notify } from "quasar";
-import { cloneDeep } from "lodash/lang";
+import { ref } from 'vue'
+import { Notify } from 'quasar'
+import { cloneDeep } from 'lodash/lang'
 import { useDishStore } from 'stores/dish'
-import { getAPI } from 'src/api'
+import { getAPI, postAPI, putAPI } from 'src/api'
 
-const dishStore = useDishStore();
+const dishStore = useDishStore()
 
-const shown = ref(false);
+const shown = ref(false)
 
-const newName = ref("");
-const cuisineOptions = ref([]);
-const cuisineMap = ref({});
-const newCuisine = ref({});
+const newName = ref('')
+const cuisineOptions = ref([])
+const cuisineMap = ref({})
+const cuisine = ref({})
 
 const show = async () => {
-  shown.value = true;
-  newName.value = dishStore.editingDish.name;
-  cuisineOptions.value = [];
-  const { data } = await getAPI("private/cuisine/list");
-  const cuisines = data.cuisines;
+  shown.value = true
+  newName.value = dishStore.editingDish.name
+  cuisineOptions.value = []
+  const { data } = await getAPI('private/cuisine/list')
+  const cuisines = data.cuisines
   cuisines.forEach(cuisine => {
     cuisineOptions.value.push({
       label: cuisine.name,
       value: cuisine.id,
-    });
-    cuisineMap.value[cuisine.id] = cuisine.name;
-  });
-  newCuisine.value = {
+    })
+    cuisineMap.value[cuisine.id] = cuisine.name
+  })
+  cuisine.value = {
     label: cuisineMap.value[dishStore.editingDish.cuisine],
     value: dishStore.editingDish.cuisine,
-  };
-};
+  }
+}
 
 const onSubmit = async (flag) => {
-  if (newName.value.trim() === "") {
-    Notify.create("请输入菜品名称");
-    return;
+  if (newName.value.trim() === '') {
+    Notify.create('请输入菜品名称')
+    return
   }
   const newDish = {
+    id: dishStore.editingDish.id,
     name: newName.value,
-    cuisine: newCuisine.value.value,
+    cuisine: cuisine.value.value,
     steps: dishStore.editingDish.steps,
-    uuid: dishStore.editingDish.uuid
-  };
-  if (dishStore.editingDish.uuid === "" || flag === "create") {
-    const { data } = await createDish(newDish);
-    if (data.message === "success") {
-      dishStore.editingDish.name = newName.value;
-      dishStore.editingDish.cuisine = newCuisine.value.value;
-      dishStore.editingDish.uuid = data.data;
-      dishStore.originEditingDish = cloneDeep(dishStore.editingDish);
-      Notify.create(flag === "create" ? "新建成功" : "保存成功");
-    } else {
-      Notify.create(flag === "create" ? "新建失败" : "保存失败");
+    uuid: dishStore.editingDish.uuid,
+  }
+  if (dishStore.editingDish.uuid === '' || flag === 'create') {
+    try {
+      const { data, message } = await postAPI('private/dish/add', newDish)
+      dishStore.editingDish.id = data.dish.id
+      dishStore.editingDish.name = data.dish.name
+      dishStore.editingDish.cuisine = data.dish.cuisine
+      dishStore.editingDish.uuid = data.dish.uuid
+      dishStore.originEditingDish = cloneDeep(dishStore.editingDish)
+      Notify.create(message)
+    } catch (e) {
+      Notify.create({
+        message: e.toString(),
+        type: 'negative',
+      })
     }
   } else {
-    const { data } = await updateDish(newDish);
-    if (data.message === "success") {
-      dishStore.editingDish.name = newName.value;
-      dishStore.editingDish.cuisine = newCuisine.value.value;
-      dishStore.originEditingDish.name = newName.value;
-      dishStore.originEditingDish.cuisine = newCuisine.value.value;
-      Notify.create("保存成功");
-    } else {
-      Notify.create("保存失败");
+    const { data, message } = await putAPI('private/dish/update-with-steps', newDish)
+    try {
+      dishStore.editingDish.name = data.dish.name
+      dishStore.editingDish.cuisine = data.dish.cuisine
+      dishStore.originEditingDish.name = data.dish.name
+      dishStore.originEditingDish.cuisine = data.dish.cuisine
+      Notify.create(message)
+    } catch (e) {
+      Notify.create({
+        message: e.toString(),
+        type: 'negative',
+      })
     }
   }
-  shown.value = false;
-};
+  shown.value = false
+}
 
 const onHide = () => {
   // newName.value = "";
@@ -131,11 +139,11 @@ const onHide = () => {
   //   label: cuisineMap[0],
   //   value: 0
   // };
-};
+}
 
 defineExpose({
   show,
-});
+})
 </script>
 
 <style lang="scss" scoped></style>

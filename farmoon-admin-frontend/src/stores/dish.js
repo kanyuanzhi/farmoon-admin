@@ -1,56 +1,60 @@
-import { defineStore } from "pinia";
-import { constantRoutes, asyncRoutes } from "src/router/routes";
-import {cloneDeep} from "lodash/lang";
+import { defineStore } from 'pinia'
+import { constantRoutes, asyncRoutes } from 'src/router/routes'
+import { cloneDeep } from 'lodash/lang'
 
-export const useDishStore = defineStore("dish", {
+export const useDishStore = defineStore('dish', {
   state: () => ({
     editingDish: {
+      id: 0,
       steps: [],
-      name: "",
+      name: '',
       cuisine: 1,
-      uuid: ""
+      uuid: '',
     },
     editingDishChangedFlag: true,
     originEditingDish: {
+      id: 0,
       steps: [],
-      name: "",
+      name: '',
       cuisine: 1,
-      uuid: ""
+      uuid: '',
     },
     lastStirFryGear: 0,
 
   }),
   getters: {},
   actions: {
-    setEditingDish(dish) {
-      this.editingDish = cloneDeep(dish);
-      this.originEditingDish = cloneDeep(dish);
-      this.shiftEditingDishChangedFlag();
+    setEditingDish (dish) {
+      this.editingDish = cloneDeep(dish)
+      this.originEditingDish = cloneDeep(dish)
+      this.shiftEditingDishChangedFlag()
     },
-    resetEditingDish() {
-      this.editingDish = cloneDeep(this.originEditingDish);
-      this.shiftEditingDishChangedFlag();
+    resetEditingDish () {
+      this.editingDish = cloneDeep(this.originEditingDish)
+      this.shiftEditingDishChangedFlag()
     },
-    newEditingDish() {
+    clearEditingDish () {
       this.editingDish = {
+        id: 0,
         steps: [],
-        name: "",
+        name: '',
         cuisine: 1,
-        uuid: ""
-      };
+        uuid: '',
+      }
       this.originEditingDish = {
+        id: 0,
         steps: [],
-        name: "",
+        name: '',
         cuisine: 1,
-        uuid: ""
-      };
-      this.shiftEditingDishChangedFlag();
+        uuid: '',
+      }
+      this.shiftEditingDishChangedFlag()
     },
-    setLastStirFryGear(gear) {
-      this.lastStirFryGear = gear;
+    setLastStirFryGear (gear) {
+      this.lastStirFryGear = gear
     },
-    shiftEditingDishChangedFlag() {
-      this.editingDishChangedFlag = !this.editingDishChangedFlag;
+    shiftEditingDishChangedFlag () {
+      this.editingDishChangedFlag = !this.editingDishChangedFlag
     },
-  }
-});
+  },
+})

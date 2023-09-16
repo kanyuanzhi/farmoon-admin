@@ -8,6 +8,7 @@ import (
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/model"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/model/request"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/model/response"
+	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/utils"
 	"strconv"
 	"strings"
 )
@@ -106,6 +107,42 @@ func (api *DishApi) Update(c *gin.Context) {
 	response.SuccessMessage(c, "更新成功")
 }
 
+func (api *DishApi) UpdateWithSteps(c *gin.Context) {
+	var updateDishWithStepsRequest request.UpdateDishWithSteps
+	if err := request.ShouldBindJSON(c, &updateDishWithStepsRequest); err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	dish := model.SysDish{
+		FXModel: global.FXModel{
+			Id: updateDishWithStepsRequest.Id,
+		},
+		Name:    updateDishWithStepsRequest.Name,
+		Cuisine: updateDishWithStepsRequest.Cuisine,
+		Steps:   updateDishWithStepsRequest.Steps,
+	}
+
+	if err := global.FXDb.Model(&dish).Select("name", "cuisine", "steps").Updates(dish).Error; err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	updateDishWithStepsResponse := response.UpdateDishWithSteps{
+		Dish: model.DishInfo{
+			Id:          dish.Id,
+			Image:       "data:image/png;base64," + base64.StdEncoding.EncodeToString(dish.Image),
+			Name:        dish.Name,
+			UUID:        dish.UUID,
+			Steps:       dish.Steps,
+			CustomSteps: dish.CustomSteps,
+			Cuisine:     dish.Cuisine,
+		},
+	}
+
+	response.SuccessMessageData(c, updateDishWithStepsResponse, "更新成功")
+}
+
 func (api *DishApi) Delete(c *gin.Context) {
 	var deleteDishesRequest request.DeleteDishes
 	if err := request.ShouldBindJSON(c, &deleteDishesRequest); err != nil {
@@ -137,12 +174,23 @@ func (api *DishApi) Add(c *gin.Context) {
 		return
 	}
 
+	imageData, err := utils.LoadLocalImage("./assets/default_dish_image.png")
+	if err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
 	dish := model.SysDish{
-		Name:        addDishRequest.Name,
-		Cuisine:     addDishRequest.Cuisine,
-		UUID:        uuid.New(),
-		Steps:       addDishRequest.Steps,
-		CustomSteps: map[string][]map[string]interface{}{},
+		Name:    addDishRequest.Name,
+		Cuisine: addDishRequest.Cuisine,
+		UUID:    uuid.New(),
+		Steps:   addDishRequest.Steps,
+		CustomSteps: map[string][]map[string]interface{}{
+			uuid.New().String(): addDishRequest.Steps,
+			uuid.New().String(): addDishRequest.Steps,
+			uuid.New().String(): addDishRequest.Steps,
+		},
+		Image: imageData,
 	}
 
 	if err := global.FXDb.Create(&dish).Error; err != nil {
@@ -150,8 +198,19 @@ func (api *DishApi) Add(c *gin.Context) {
 		return
 	}
 
-	response.SuccessMessage(c, "添加成功")
+	addDishResponse := response.AddDish{
+		Dish: model.DishInfo{
+			Id:          dish.Id,
+			Image:       "data:image/png;base64," + base64.StdEncoding.EncodeToString(dish.Image),
+			Name:        dish.Name,
+			UUID:        dish.UUID,
+			Steps:       dish.Steps,
+			CustomSteps: dish.CustomSteps,
+			Cuisine:     dish.Cuisine,
+		},
+	}
 
+	response.SuccessMessageData(c, addDishResponse, "添加成功")
 }
 
 func (api *DishApi) UpdateImage(c *gin.Context) {
