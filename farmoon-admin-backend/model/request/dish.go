@@ -18,6 +18,11 @@ type UpdateDish struct {
 	Cuisine uint   `json:"cuisine"`
 }
 
+type UpdateDishWithSteps struct {
+	UpdateDish
+	Steps []map[string]interface{} `json:"steps"`
+}
+
 type DeleteDishes struct {
 	Ids []uint `json:"ids"`
 }

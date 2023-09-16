@@ -35,6 +35,10 @@ var migrateList = []interface{}{
 	model.SysUser{},
 	model.SysDish{},
 	model.SysCuisine{},
+	model.SysSeasoning{},
+	model.SysIngredient{},
+	model.SysIngredientType{},
+	model.SysIngredientShape{},
 }
 
 func InitDb() error {

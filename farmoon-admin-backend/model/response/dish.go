@@ -13,3 +13,11 @@ type ListDishes struct {
 type UpdateDishImage struct {
 	Image string `json:"image"`
 }
+
+type AddDish struct {
+	Dish model.DishInfo `json:"dish"`
+}
+
+type UpdateDishWithSteps struct {
+	Dish model.DishInfo `json:"dish"`
+}
