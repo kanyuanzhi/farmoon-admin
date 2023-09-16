@@ -86,3 +86,18 @@ func GenerateDishQueryCondition(filter string, enableCuisineFilter bool, cuisine
 
 	return filterDb, nil
 }
+
+func GenerateIngredientQueryCondition(enableTypeFilter bool, typeFilter []string) (*gorm.DB, error) {
+	filerDb := global.FXDb.Model(&model.SysIngredient{})
+
+	if enableTypeFilter {
+		var typeFilterUint []uint
+		for _, ingredientType := range typeFilter {
+			ingredientTypeId, _ := strconv.ParseUint(ingredientType, 10, 32)
+			typeFilterUint = append(typeFilterUint, uint(ingredientTypeId))
+		}
+		filerDb = filerDb.Where("type in ?", typeFilterUint)
+	}
+
+	return filerDb, nil
+}

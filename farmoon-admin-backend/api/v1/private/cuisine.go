@@ -79,15 +79,15 @@ func (api *CuisineApi) UpdateUnDeletable(c *gin.Context) {
 	response.SuccessMessage(c, "更新不可删除属性成功")
 }
 
-func (api *CuisineApi) UpdateSort(c *gin.Context) {
-	var updateCuisinesSortRequest request.UpdateCuisinesSort
-	if err := request.ShouldBindJSON(c, &updateCuisinesSortRequest); err != nil {
+func (api *CuisineApi) UpdateSorts(c *gin.Context) {
+	var updateCuisinesSortsRequest request.UpdateCuisinesSorts
+	if err := request.ShouldBindJSON(c, &updateCuisinesSortsRequest); err != nil {
 		response.ErrorMessage(c, err.Error())
 		return
 	}
 
 	tx := global.FXDb.Begin()
-	for _, cuisine := range updateCuisinesSortRequest.Cuisines {
+	for _, cuisine := range updateCuisinesSortsRequest.Cuisines {
 		sysCuisine := model.SysCuisine{
 			FXModel: global.FXModel{
 				Id:   cuisine.Id,
@@ -138,16 +138,14 @@ func (api *CuisineApi) Delete(c *gin.Context) {
 		response.ErrorMessage(c, result.Error.Error()+"：当前未设置不允许删除的菜系，无法删除")
 		return
 	}
-	if result.RowsAffected == 0 {
-		response.ErrorMessage(c, "当前未设置不允许删除的菜系，无法删除")
-		return
-	}
 
 	// 划归菜品到‘其他’类别下
-	if err := global.FXDb.Model(model.SysDish{}).Where("cuisine", cuisine.Id).Updates(model.SysDish{Cuisine: unDeletableCuisine.Id}).Error; err != nil {
+	if err := global.FXDb.Model(model.SysDish{}).Where("cuisine", cuisine.Id).
+		Updates(model.SysDish{Cuisine: unDeletableCuisine.Id}).Error; err != nil {
 		response.ErrorMessage(c, err.Error())
 		return
 	}
+
 	// 删除该菜系
 	if err := global.FXDb.Delete(&cuisine).Error; err != nil {
 		response.ErrorMessage(c, err.Error())

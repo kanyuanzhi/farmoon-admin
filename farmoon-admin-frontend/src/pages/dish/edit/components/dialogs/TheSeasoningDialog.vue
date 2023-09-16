@@ -7,10 +7,10 @@
           <div class="text-h6">添加调料</div>
         </q-card-section>
         <q-card-section>
-          <TheSeasoningItem v-for="(seasoning,index) in seasonings" :key="seasoning.key" :index="index"
-                            :seasoning="seasoning" :seasoning-options="seasoningOptions"
-                            @delete="onDelete(index)" @seasoning-select="onSeasoningSelect"
-                            @weight-select="onWeightSelect"/>
+          <SeasoningItem v-for="(seasoning,index) in seasonings" :key="seasoning.key" :index="index"
+                         :seasoning="seasoning" :seasoning-options="seasoningOptions"
+                         @delete="onDelete(index)" @seasoning-select="onSeasoningSelect"
+                         @weight-select="onWeightSelect"/>
         </q-card-section>
         <q-card-actions align="right">
           <q-btn v-close-popup flat color="teal-6">取消</q-btn>
@@ -23,12 +23,13 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import TheSeasoningItem from "pages/dish/edit/components/TheSeasoningItem.vue";
-import { cloneDeep } from "lodash/lang";
-import { Notify } from "quasar";
+import {ref} from "vue";
+import SeasoningItem from "pages/dish/edit/components/SeasoningItem.vue";
+import {cloneDeep} from "lodash/lang";
+import {Notify} from "quasar";
 // import { getSeasonings } from "src/api/seasoning";
-import { newSeasoningStep } from "pages/dish/edit/components/dialogs/newStep";
+import {newSeasoningStep} from "pages/dish/edit/components/dialogs/newStep";
+import {getAPI} from "src/api";
 
 const emits = defineEmits(["update", "submit"]);
 
@@ -54,17 +55,18 @@ const seasoningOptions = ref([]);
 const show = async (index = -1) => {
   shown.value = true;
   stepIndex = index;
-  const { data } = await getSeasonings();
-  const seasoningMap = data.data;
-  for (let i in seasoningMap) {
-    if (i === "7" || i === "8") continue; // 7、8号阀为自来水阀，不做调料阀
-    seasoningOptionsTpl.push(
-      {
-        label: seasoningMap[i],
-        pumpNumber: Number(i)
-      }
-    );
-  }
+  const {data} = await getAPI("/private/seasoning/list");
+  const seasoningsData = data.seasonings
+  seasoningsData.forEach(seasoning => {
+    if (![7, 8].includes(seasoning.pump)) {
+      seasoningOptionsTpl.push(
+        {
+          label: seasoning.name,
+          pumpNumber: seasoning.pump
+        }
+      );
+    }
+  })
   seasoningOptions.value = seasoningOptionsTpl;
 };
 
@@ -73,16 +75,18 @@ const updateDialogShow = async (step, index) => {
   isUpdate = true;
   stepIndex = index;
   seasonings.value = step.seasonings;
-  const { data } = await getSeasonings();
-  const seasoningMap = data.data;
-  for (let i in seasoningMap) {
-    seasoningOptionsTpl.push(
-      {
-        label: seasoningMap[i],
-        pumpNumber: Number(i)
-      }
-    );
-  }
+  const {data} = await getAPI("/private/seasoning/list");
+  const seasoningsData = data.seasonings
+  seasoningsData.forEach(seasoning => {
+    if (![7, 8].includes(seasoning.pump)) {
+      seasoningOptionsTpl.push(
+        {
+          label: seasoning.name,
+          pumpNumber: seasoning.pump
+        }
+      );
+    }
+  })
   generateSeasoningOptions();
 };
 

@@ -15,7 +15,7 @@ type UpdateCuisineUnDeletable struct {
 	UnDeletable bool `json:"unDeletable"`
 }
 
-type UpdateCuisinesSort struct {
+type UpdateCuisinesSorts struct {
 	Cuisines []model.CuisineInfo `json:"cuisines"`
 }
 
