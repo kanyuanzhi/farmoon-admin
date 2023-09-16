@@ -3,7 +3,6 @@ package global
 import (
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/config"
 	"gorm.io/gorm"
-	"time"
 )
 
 var (
@@ -12,9 +11,9 @@ var (
 )
 
 type FXModel struct {
-	Id        uint      `json:"id" gorm:"comment:id;primaryKey;autoIncrement;"`
-	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
-	Sort      uint      `json:"sort" gorm:"comment:排序;default:1;"`
-	Memo      string    `json:"memo" gorm:"comment:备注描述;type:text;"`
+	Id        uint   `json:"id" gorm:"comment:id;primaryKey;autoIncrement;"`
+	CreatedAt int64  `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt int64  `json:"updated_at" gorm:"autoUpdateTime"`
+	Sort      uint   `json:"sort" gorm:"comment:排序;default:1;"`
+	Memo      string `json:"memo" gorm:"comment:备注描述;type:text;"`
 }
