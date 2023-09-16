@@ -232,7 +232,7 @@ func (api *UserApi) Add(c *gin.Context) {
 
 	passwordEncoded, _ := utils.EncodeBcrypt(addUserRequest.Password)
 
-	imageData, err := utils.LoadDefaultProfilePhoto()
+	imageData, err := utils.LoadLocalImage("./assets/default_profile_photo.jpg")
 	if err != nil {
 		response.ErrorMessage(c, err.Error())
 		return
