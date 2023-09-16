@@ -1,7 +1,7 @@
 <template>
   <div>
-    <q-dialog v-model="shown" @hide="onHide" position="top">
-      <q-card style="width: 400px;margin-top: 50px" class="q-mt-md">
+    <q-dialog v-model="shown" @hide="onHide">
+      <q-card style="width: 400px;" class="q-mt-md">
         <q-card-section class="bg-teal-6 text-white q-py-sm">
           <div class="text-h6">保存菜品</div>
         </q-card-section>
@@ -14,8 +14,6 @@
                 filled
                 dense
                 autofocus
-                @blur="onInputBlur($event, 'newName')"
-                @focus="onInputFocus($event, 'newName')"
               >
               </q-input>
             </q-item-section>
@@ -58,12 +56,11 @@
 <script setup>
 import { ref } from "vue";
 import { Notify } from "quasar";
-import { createDish, updateDish } from "src/api/dish";
-import { getCuisines } from "src/api/cuisine";
-import { UseAppStore } from "stores/appStore";
 import { cloneDeep } from "lodash/lang";
+import { useDishStore } from 'stores/dish'
+import { getAPI } from 'src/api'
 
-const useAppStore = UseAppStore();
+const dishStore = useDishStore();
 
 const shown = ref(false);
 
@@ -74,10 +71,10 @@ const newCuisine = ref({});
 
 const show = async () => {
   shown.value = true;
-  newName.value = useAppStore.editingDish.name;
+  newName.value = dishStore.editingDish.name;
   cuisineOptions.value = [];
-  const { data } = await getCuisines();
-  const cuisines = data.data;
+  const { data } = await getAPI("private/cuisine/list");
+  const cuisines = data.cuisines;
   cuisines.forEach(cuisine => {
     cuisineOptions.value.push({
       label: cuisine.name,
@@ -86,31 +83,11 @@ const show = async () => {
     cuisineMap.value[cuisine.id] = cuisine.name;
   });
   newCuisine.value = {
-    label: cuisineMap.value[useAppStore.editingDish.cuisine],
-    value: useAppStore.editingDish.cuisine,
+    label: cuisineMap.value[dishStore.editingDish.cuisine],
+    value: dishStore.editingDish.cuisine,
   };
 };
 
-const inputNameToPara = {
-  newName,
-};
-
-const customKeyboard = ref(null);
-const onInputFocus = (e, inputName) => {
-  customKeyboard.value.setInputName(inputName);
-  customKeyboard.value.setInput(e.target.value, inputName);
-};
-
-const onInputBlur = (e, inputName) => {
-};
-
-const setDefaultName = (defaultName) => {
-  name.value = defaultName;
-};
-
-const onChange = (input, inputName) => {
-  inputNameToPara[inputName].value = input;
-};
 const onSubmit = async (flag) => {
   if (newName.value.trim() === "") {
     Notify.create("请输入菜品名称");
@@ -119,16 +96,16 @@ const onSubmit = async (flag) => {
   const newDish = {
     name: newName.value,
     cuisine: newCuisine.value.value,
-    steps: useAppStore.editingDish.steps,
-    uuid: useAppStore.editingDish.uuid
+    steps: dishStore.editingDish.steps,
+    uuid: dishStore.editingDish.uuid
   };
-  if (useAppStore.editingDish.uuid === "" || flag === "create") {
+  if (dishStore.editingDish.uuid === "" || flag === "create") {
     const { data } = await createDish(newDish);
     if (data.message === "success") {
-      useAppStore.editingDish.name = newName.value;
-      useAppStore.editingDish.cuisine = newCuisine.value.value;
-      useAppStore.editingDish.uuid = data.data;
-      useAppStore.originEditingDish = cloneDeep(useAppStore.editingDish);
+      dishStore.editingDish.name = newName.value;
+      dishStore.editingDish.cuisine = newCuisine.value.value;
+      dishStore.editingDish.uuid = data.data;
+      dishStore.originEditingDish = cloneDeep(dishStore.editingDish);
       Notify.create(flag === "create" ? "新建成功" : "保存成功");
     } else {
       Notify.create(flag === "create" ? "新建失败" : "保存失败");
@@ -136,10 +113,10 @@ const onSubmit = async (flag) => {
   } else {
     const { data } = await updateDish(newDish);
     if (data.message === "success") {
-      useAppStore.editingDish.name = newName.value;
-      useAppStore.editingDish.cuisine = newCuisine.value.value;
-      useAppStore.originEditingDish.name = newName.value;
-      useAppStore.originEditingDish.cuisine = newCuisine.value.value;
+      dishStore.editingDish.name = newName.value;
+      dishStore.editingDish.cuisine = newCuisine.value.value;
+      dishStore.originEditingDish.name = newName.value;
+      dishStore.originEditingDish.cuisine = newCuisine.value.value;
       Notify.create("保存成功");
     } else {
       Notify.create("保存失败");
