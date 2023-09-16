@@ -1,154 +1,74 @@
 <template>
-  <q-dialog v-model="shown">
-    <q-card class="column" style="width: 400px">
+  <q-dialog v-model="shown" @hide="onHide">
+    <q-card class="column" style="width: 90%">
       <q-card-section>
         <div class="text-subtitle1">选择食材</div>
       </q-card-section>
       <q-separator/>
-      <q-card-section class="row">
-        <q-list class="col" separator dense>
-          <q-item-section>
-            <q-item-label caption>肉类</q-item-label>
-          </q-item-section>
-          <q-scroll-area style="height: 400px; max-width: 300px;">
-            <q-item  v-for="opt in meatOptions" :key="opt.key" clickable v-ripple @click="onSelect($event, opt.name)">
-              <q-item-section>{{ opt.name }}</q-item-section>
-            </q-item>
-          </q-scroll-area>
-        </q-list>
-        <q-separator vertical/>
-        <q-list class="col q-pl-md" separator>
-          <q-item-section side top>
-            <q-item-label caption>菜类</q-item-label>
-          </q-item-section>
-          <q-scroll-area style="height: 400px; max-width: 300px;">
-            <q-item dense v-for="opt in vegetableOptions" :key="opt.key" clickable v-ripple @click="onSelect($event, opt.name)">
-              <q-item-section>{{ opt.name }}</q-item-section>
-            </q-item>
-          </q-scroll-area>
-        </q-list>
+      <q-card-section class="row q-gutter-md">
+        <div v-for="type in ingredientTypes" :key="type.id" class="col">
+          <div class="q-pl-md text-weight-bold">{{ type.name }}</div>
+          <q-list dense>
+            <q-scroll-area style="height: 400px; max-width: 300px;">
+              <q-item v-for="(ingredient, index) in ingredients[type.id]" :key="ingredient.id" dense clickable v-ripple
+                      @click="onSelect($event, ingredient.name)">
+                <q-item-section>{{ index + 1 + '. ' + ingredient.name }}</q-item-section>
+              </q-item>
+            </q-scroll-area>
+          </q-list>
+        </div>
       </q-card-section>
     </q-card>
   </q-dialog>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref } from 'vue'
+import { getAPI } from 'src/api'
 
-const emit = defineEmits(["select"]);
+const emit = defineEmits(['select'])
 
-const shown = ref(false);
-const meatOptions = ref([
-  {
-    key: "1",
-    name: "猪肉"
-  },
-  {
-    key: "2",
-    name: "牛肉"
-  },
-  {
-    key: "3",
-    name: "羊肉"
-  },
-  {
-    key: "4",
-    name: "鸡肉"
-  },
-  {
-    key: "5",
-    name: "鸭肉"
-  },
-  {
-    key: "6",
-    name: "鱼肉"
-  },
-  {
-    key: "6",
-    name: "火腿"
-  },
-]);
-const vegetableOptions = ref([
-  {
-    key: "1",
-    name: "胡萝卜"
-  },
-  {
-    key: "2",
-    name: "西兰花"
-  },
-  {
-    key: "3",
-    name: "洋葱"
-  },
-  {
-    key: "4",
-    name: "土豆"
-  },
-  {
-    key: "5",
-    name: "番茄"
-  },
-  {
-    key: "6",
-    name: "黄瓜"
-  },
-  {
-    key: "7",
-    name: "菠菜"
-  },
-  {
-    key: "8",
-    name: "生菜"
-  },
-  {
-    key: "9",
-    name: "青豆"
-  },
-  {
-    key: "10",
-    name: "青椒"
-  },
-  {
-    key: "11",
-    name: "茄子"
-  },
-  {
-    key: "12",
-    name: "花菜"
-  },
-  {
-    key: "13",
-    name: "豌豆"
-  },
-  {
-    key: "14",
-    name: "南瓜"
-  },
-  {
-    key: "15",
-    name: "菜花"
+const shown = ref(false)
+
+const ingredients = ref({}) // 食材
+const ingredientTypes = ref([]) // 食材类型
+
+const show = async () => {
+  shown.value = true
+  try {
+    const ingredientTypeData = await getAPI('private/ingredient-type/list')
+    ingredientTypes.value = ingredientTypeData.data.ingredientTypes
+    const ingredientData = await getAPI('private/ingredient/list')
+    ingredientData.data.ingredients.forEach((ingredient) => {
+      if (!ingredients.value[ingredient.type]) {
+        ingredients.value[ingredient.type] = []
+      }
+      ingredients.value[ingredient.type].push(ingredient)
+    })
+  } catch (e) {
+    console.log(e.toString())
   }
-])
-
-const show = () => {
-  shown.value = true;
-  // getIngredients()
-  //   .then(res => {
-  //     options.value = res.data;
-  //   });
-};
+}
 
 const onSelect = (e, val) => {
-  emit("select", val);
-  shown.value = false;
-};
+  emit('select', val)
+  shown.value = false
+}
+
+const onHide = () => {
+  ingredients.value = {}
+  ingredientTypes.value = []
+}
 
 defineExpose({
-  show
-});
+  show,
+})
 </script>
 
 <style lang="scss" scoped>
-
+@media (min-width: 1000px) {
+  .q-dialog__inner--minimized > div {
+    max-width: 1000px;
+  }
+}
 </style>

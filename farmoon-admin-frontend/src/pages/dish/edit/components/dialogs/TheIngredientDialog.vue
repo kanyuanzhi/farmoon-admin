@@ -95,22 +95,22 @@ const updateDialogShow = (step, index) => {
   slotNumber.value = step.slotNumber;
 };
 
-const inputNameToPara = {
-  name,
-  shape,
-};
+// const inputNameToPara = {
+//   name,
+//   shape,
+// };
 
 const customKeyboard = ref(null);
 const onInputFocus = (e, inputName) => {
-  customKeyboard.value.setInputName(inputName);
-  customKeyboard.value.setInput(e.target.value, inputName);
+  // customKeyboard.value.setInputName(inputName);
+  // customKeyboard.value.setInput(e.target.value, inputName);
 };
 
 const onInputBlur = (e, inputName) => {
 };
 
 const onChange = (input, inputName) => {
-  inputNameToPara[inputName].value = input;
+  // inputNameToPara[inputName].value = input;
 };
 
 const theIngredientNameSelectionDialog = ref(null);

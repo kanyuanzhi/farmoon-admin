@@ -21,3 +21,9 @@ type UpdateDish struct {
 type DeleteDishes struct {
 	Ids []uint `json:"ids"`
 }
+
+type AddDish struct {
+	Name    string                   `json:"name"`
+	Cuisine uint                     `json:"cuisine"`
+	Steps   []map[string]interface{} `json:"steps"`
+}

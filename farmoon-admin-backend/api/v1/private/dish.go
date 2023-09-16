@@ -3,6 +3,7 @@ package private
 import (
 	"encoding/base64"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/global"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/model"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/model/request"
@@ -127,6 +128,30 @@ func (api *DishApi) Delete(c *gin.Context) {
 	}
 
 	response.SuccessMessage(c, "删除成功")
+}
+
+func (api *DishApi) Add(c *gin.Context) {
+	var addDishRequest request.AddDish
+	if err := request.ShouldBindJSON(c, &addDishRequest); err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	dish := model.SysDish{
+		Name:        addDishRequest.Name,
+		Cuisine:     addDishRequest.Cuisine,
+		UUID:        uuid.New(),
+		Steps:       addDishRequest.Steps,
+		CustomSteps: map[string][]map[string]interface{}{},
+	}
+
+	if err := global.FXDb.Create(&dish).Error; err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	response.SuccessMessage(c, "添加成功")
+
 }
 
 func (api *DishApi) UpdateImage(c *gin.Context) {
