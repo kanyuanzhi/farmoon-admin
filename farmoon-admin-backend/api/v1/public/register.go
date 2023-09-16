@@ -28,7 +28,7 @@ func (api *RegisterApi) Register(c *gin.Context) {
 	}
 	passwordEncoded, _ := utils.EncodeBcrypt(registerRequest.Password)
 
-	imageData, err := utils.LoadDefaultProfilePhoto()
+	imageData, err := utils.LoadLocalImage("./assets/default_profile_photo.jpg")
 	if err != nil {
 		response.ErrorMessage(c, err.Error())
 		return

@@ -25,8 +25,8 @@ func Reload(configName string, target interface{}) {
 	}
 }
 
-func LoadDefaultProfilePhoto() ([]byte, error) {
-	imagePath := "./assets/default_profile_photo.jpg"
+func LoadLocalImage(path string) ([]byte, error) {
+	imagePath := path
 	imageData, err := os.ReadFile(imagePath)
 	if err != nil {
 		return nil, err
