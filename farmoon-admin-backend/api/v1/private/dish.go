@@ -66,13 +66,13 @@ func (api *DishApi) List(c *gin.Context) {
 	dishesInfo := []model.DishInfo{}
 	for _, dish := range dishes {
 		dishesInfo = append(dishesInfo, model.DishInfo{
-			Id:          dish.Id,
-			Image:       "data:image/png;base64," + base64.StdEncoding.EncodeToString(dish.Image),
-			Name:        dish.Name,
-			UUID:        dish.UUID,
-			Steps:       dish.Steps,
-			CustomSteps: dish.CustomSteps,
-			Cuisine:     dish.Cuisine,
+			Id:              dish.Id,
+			Image:           "data:image/png;base64," + base64.StdEncoding.EncodeToString(dish.Image),
+			Name:            dish.Name,
+			UUID:            dish.UUID,
+			Steps:           dish.Steps,
+			CustomStepsList: dish.CustomStepsList,
+			Cuisine:         dish.Cuisine,
 		})
 	}
 
@@ -121,22 +121,27 @@ func (api *DishApi) UpdateWithSteps(c *gin.Context) {
 		Name:    updateDishWithStepsRequest.Name,
 		Cuisine: updateDishWithStepsRequest.Cuisine,
 		Steps:   updateDishWithStepsRequest.Steps,
+		CustomStepsList: map[string][]map[string]interface{}{
+			uuid.New().String(): updateDishWithStepsRequest.Steps,
+			uuid.New().String(): updateDishWithStepsRequest.Steps,
+			uuid.New().String(): updateDishWithStepsRequest.Steps,
+		},
 	}
 
-	if err := global.FXDb.Model(&dish).Select("name", "cuisine", "steps").Updates(dish).Error; err != nil {
+	if err := global.FXDb.Model(&dish).Select("name", "cuisine", "steps", "custom_steps_list").Updates(dish).Error; err != nil {
 		response.ErrorMessage(c, err.Error())
 		return
 	}
 
 	updateDishWithStepsResponse := response.UpdateDishWithSteps{
 		Dish: model.DishInfo{
-			Id:          dish.Id,
-			Image:       "data:image/png;base64," + base64.StdEncoding.EncodeToString(dish.Image),
-			Name:        dish.Name,
-			UUID:        dish.UUID,
-			Steps:       dish.Steps,
-			CustomSteps: dish.CustomSteps,
-			Cuisine:     dish.Cuisine,
+			Id:              dish.Id,
+			Image:           "data:image/png;base64," + base64.StdEncoding.EncodeToString(dish.Image),
+			Name:            dish.Name,
+			UUID:            dish.UUID,
+			Steps:           dish.Steps,
+			CustomStepsList: dish.CustomStepsList,
+			Cuisine:         dish.Cuisine,
 		},
 	}
 
@@ -185,12 +190,15 @@ func (api *DishApi) Add(c *gin.Context) {
 		Cuisine: addDishRequest.Cuisine,
 		UUID:    uuid.New(),
 		Steps:   addDishRequest.Steps,
-		CustomSteps: map[string][]map[string]interface{}{
+		CustomStepsList: map[string][]map[string]interface{}{
 			uuid.New().String(): addDishRequest.Steps,
 			uuid.New().String(): addDishRequest.Steps,
 			uuid.New().String(): addDishRequest.Steps,
 		},
-		Image: imageData,
+		Image:      imageData,
+		IsOfficial: true,
+		IsShared:   true,
+		IsMarked:   false,
 	}
 
 	if err := global.FXDb.Create(&dish).Error; err != nil {
@@ -200,13 +208,16 @@ func (api *DishApi) Add(c *gin.Context) {
 
 	addDishResponse := response.AddDish{
 		Dish: model.DishInfo{
-			Id:          dish.Id,
-			Image:       "data:image/png;base64," + base64.StdEncoding.EncodeToString(dish.Image),
-			Name:        dish.Name,
-			UUID:        dish.UUID,
-			Steps:       dish.Steps,
-			CustomSteps: dish.CustomSteps,
-			Cuisine:     dish.Cuisine,
+			Id:              dish.Id,
+			Image:           "data:image/png;base64," + base64.StdEncoding.EncodeToString(dish.Image),
+			Name:            dish.Name,
+			UUID:            dish.UUID,
+			Steps:           dish.Steps,
+			CustomStepsList: dish.CustomStepsList,
+			Cuisine:         dish.Cuisine,
+			IsOfficial:      dish.IsOfficial,
+			IsShared:        dish.IsShared,
+			IsMarked:        dish.IsMarked,
 		},
 	}
 

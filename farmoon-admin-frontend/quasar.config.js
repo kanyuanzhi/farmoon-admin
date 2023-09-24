@@ -78,7 +78,7 @@ module.exports = configure(function (ctx) {
           // 测试代理地址
           ? "http://localhost:10000/farmoon-api/v1/"
           // 正式代理地址
-          : "http://81.68.159.232:10000/farmoon-api/v1/"
+          : "http://221.229.103.87:10000/farmoon-api/v1/"
       },
       // rawDefine: {}
       // ignorePublicFolder: true,

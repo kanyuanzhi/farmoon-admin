@@ -68,7 +68,7 @@ func GenerateUserQueryCondition(filter string, enableGenderFilter bool, genderFi
 }
 
 func GenerateDishQueryCondition(filter string, enableCuisineFilter bool, cuisineFilter []string) (*gorm.DB, error) {
-	filterDb := global.FXDb.Model(&model.SysDish{})
+	filterDb := global.FXDb.Model(&model.SysDish{}).Where("is_official = ?", true)
 
 	if enableCuisineFilter {
 		var cuisineFilterUint []uint

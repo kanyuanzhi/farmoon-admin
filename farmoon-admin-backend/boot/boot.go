@@ -26,6 +26,10 @@ func Boot() {
 		}
 	}()
 
+	go func() {
+		RPC()
+	}()
+
 	logo(global.FXConfig.System.Port)
 
 	quit := make(chan os.Signal, 1)

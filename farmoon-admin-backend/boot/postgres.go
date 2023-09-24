@@ -39,6 +39,7 @@ var migrateList = []interface{}{
 	model.SysIngredient{},
 	model.SysIngredientType{},
 	model.SysIngredientShape{},
+	model.SysUserDeletedDish{},
 }
 
 func InitDb() error {
