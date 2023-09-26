@@ -14,6 +14,7 @@ type CuisineApi struct {
 func (api *CuisineApi) List(c *gin.Context) {
 	var cuisines []model.SysCuisine
 	if err := global.FXDb.Order("sort").Find(&cuisines).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -50,6 +51,7 @@ func (api *CuisineApi) UpdateName(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Model(&cuisine).Update("name", cuisine.Name).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -72,6 +74,7 @@ func (api *CuisineApi) UpdateUnDeletable(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Model(&cuisine).Update("un_deletable", cuisine.UnDeletable).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -96,12 +99,14 @@ func (api *CuisineApi) UpdateSorts(c *gin.Context) {
 		}
 		if err := tx.Model(&sysCuisine).Update("sort", sysCuisine.Sort).Error; err != nil {
 			tx.Rollback()
+			global.FXLogger.Error(err.Error())
 			response.ErrorMessage(c, err.Error())
 			return
 		}
 	}
 
 	if err := tx.Commit().Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -123,11 +128,13 @@ func (api *CuisineApi) Delete(c *gin.Context) {
 		},
 	}
 	if err := global.FXDb.First(&cuisine).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
 
 	if cuisine.UnDeletable {
+		global.FXLogger.Error("不允许删除该类别菜系")
 		response.ErrorMessage(c, "不允许删除该类别菜系")
 		return
 	}
@@ -135,6 +142,7 @@ func (api *CuisineApi) Delete(c *gin.Context) {
 	var unDeletableCuisine model.SysCuisine
 	result := global.FXDb.Where("un_deletable", true).First(&unDeletableCuisine)
 	if result.Error != nil {
+		global.FXLogger.Error(result.Error.Error() + "当前未设置不允许删除的菜系，无法删除")
 		response.ErrorMessage(c, result.Error.Error()+"：当前未设置不允许删除的菜系，无法删除")
 		return
 	}
@@ -142,12 +150,15 @@ func (api *CuisineApi) Delete(c *gin.Context) {
 	// 划归菜品到‘其他’类别下
 	if err := global.FXDb.Model(model.SysDish{}).Where("cuisine", cuisine.Id).
 		Updates(model.SysDish{Cuisine: unDeletableCuisine.Id}).Error; err != nil {
+		global.FXLogger.Error(err.Error())
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
 
 	// 删除该菜系
 	if err := global.FXDb.Delete(&cuisine).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -171,6 +182,7 @@ func (api *CuisineApi) Add(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Create(&cuisine).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}

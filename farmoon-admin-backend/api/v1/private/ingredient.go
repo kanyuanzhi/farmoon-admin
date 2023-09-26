@@ -21,12 +21,14 @@ func (api *IngredientApi) Count(c *gin.Context) {
 	filterDb, err := request.GenerateIngredientQueryCondition(countIngredientsRequest.EnableTypeFilter,
 		strings.Split(countIngredientsRequest.TypeFilter, ","))
 	if err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
 
 	var count int64
 	if err := filterDb.Count(&count).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -48,12 +50,14 @@ func (api *IngredientApi) List(c *gin.Context) {
 	filterDb, err := request.GenerateIngredientQueryCondition(listIngredientsRequest.EnableTypeFilter,
 		strings.Split(listIngredientsRequest.TypeFilter, ","))
 	if err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
 
 	var ingredients []model.SysIngredient
 	if err := filterDb.Order("sort").Find(&ingredients).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -91,6 +95,7 @@ func (api *IngredientApi) Add(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Create(&ingredient).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -123,6 +128,7 @@ func (api *IngredientApi) Update(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Model(&ingredient).Select("name", "type").Updates(ingredient).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -144,6 +150,7 @@ func (api *IngredientApi) Delete(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Delete(&ingredient).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}

@@ -7,6 +7,7 @@ system:
   errorMessage: Failed
   bindErrorMessage: Bind Error
   loadLocalResourceErrorMessage: Load Local Resource Error
+  rpcErrorMessage: RPC Error
 
 postgres:
   host: 127.0.0.1

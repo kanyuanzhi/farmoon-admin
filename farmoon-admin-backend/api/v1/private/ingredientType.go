@@ -13,6 +13,7 @@ type IngredientTypeApi struct{}
 func (api *IngredientTypeApi) Count(c *gin.Context) {
 	var count int64
 	if err := global.FXDb.Model(&model.SysIngredientType{}).Count(&count).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -27,6 +28,7 @@ func (api *IngredientTypeApi) Count(c *gin.Context) {
 func (api *IngredientTypeApi) List(c *gin.Context) {
 	var ingredientTypes []model.SysIngredientType
 	if err := global.FXDb.Order("sort").Find(&ingredientTypes).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -64,6 +66,7 @@ func (api *IngredientTypeApi) Add(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Create(&ingredientType).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -96,6 +99,7 @@ func (api *IngredientTypeApi) Update(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Model(&ingredientType).Select("name", "un_deletable").Updates(ingredientType).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -120,12 +124,14 @@ func (api *IngredientTypeApi) UpdateSorts(c *gin.Context) {
 		}
 		if err := tx.Model(&sysIngredientType).Select("sort").Updates(sysIngredientType).Error; err != nil {
 			tx.Rollback()
+			global.FXLogger.Error(err.Error())
 			response.ErrorMessage(c, err.Error())
 			return
 		}
 	}
 
 	if err := tx.Commit().Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -146,11 +152,13 @@ func (api *IngredientTypeApi) Delete(c *gin.Context) {
 		},
 	}
 	if err := global.FXDb.First(&ingredientType).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
 
 	if ingredientType.UnDeletable {
+		global.FXLogger.Error("不允许删除该食材类别")
 		response.ErrorMessage(c, "不允许删除该食材类别")
 		return
 	}
@@ -158,6 +166,7 @@ func (api *IngredientTypeApi) Delete(c *gin.Context) {
 	var unDeletableIngredientType model.SysIngredientType
 	result := global.FXDb.Where("un_deletable", true).First(&unDeletableIngredientType)
 	if result.Error != nil {
+		global.FXLogger.Error("当前未设置不允许删除的食材类别，无法删除")
 		response.ErrorMessage(c, result.Error.Error()+"：当前未设置不允许删除的食材类别，无法删除")
 		return
 	}
@@ -165,12 +174,14 @@ func (api *IngredientTypeApi) Delete(c *gin.Context) {
 	// 划归食材到‘其他’类别下
 	if err := global.FXDb.Model(model.SysIngredient{}).Where("type", ingredientType.Id).
 		Updates(model.SysIngredient{Type: unDeletableIngredientType.Id}).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
 
 	// 删除该食材类别
 	if err := global.FXDb.Delete(&ingredientType).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}

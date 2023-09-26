@@ -25,12 +25,14 @@ func (api *DishApi) Count(c *gin.Context) {
 	filterDb, err := request.GenerateDishQueryCondition(countDishesRequest.Filter, countDishesRequest.EnableCuisineFilter,
 		strings.Split(countDishesRequest.CuisineFilter, ","))
 	if err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
 
 	var count int64
 	if err := filterDb.Count(&count).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -52,6 +54,7 @@ func (api *DishApi) List(c *gin.Context) {
 	filterDb, err := request.GenerateDishQueryCondition(listDishesRequest.Filter, listDishesRequest.EnableCuisineFilter,
 		strings.Split(listDishesRequest.CuisineFilter, ","))
 	if err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -59,6 +62,7 @@ func (api *DishApi) List(c *gin.Context) {
 	var dishes []model.SysDish
 	if err := filterDb.Limit(listDishesRequest.PageSize).Offset((listDishesRequest.PageIndex - 1) * listDishesRequest.PageSize).
 		Order("id").Find(&dishes).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -100,6 +104,7 @@ func (api *DishApi) Update(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Model(&dish).Select("name", "cuisine").Updates(dish).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -129,6 +134,7 @@ func (api *DishApi) UpdateWithSteps(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Model(&dish).Select("name", "cuisine", "steps", "custom_steps_list").Updates(dish).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -165,6 +171,7 @@ func (api *DishApi) Delete(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Delete(&dishes).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -181,6 +188,7 @@ func (api *DishApi) Add(c *gin.Context) {
 
 	imageData, err := utils.LoadLocalImage("./assets/default_dish_image.png")
 	if err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -202,6 +210,7 @@ func (api *DishApi) Add(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Create(&dish).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -227,6 +236,7 @@ func (api *DishApi) Add(c *gin.Context) {
 func (api *DishApi) UpdateImage(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -234,6 +244,7 @@ func (api *DishApi) UpdateImage(c *gin.Context) {
 	// Open the uploaded file
 	src, err := file.Open()
 	if err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -243,6 +254,7 @@ func (api *DishApi) UpdateImage(c *gin.Context) {
 	fileData := make([]byte, file.Size)
 	_, err = src.Read(fileData)
 	if err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -255,6 +267,7 @@ func (api *DishApi) UpdateImage(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Model(&dish).Update("image", dish.Image).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}

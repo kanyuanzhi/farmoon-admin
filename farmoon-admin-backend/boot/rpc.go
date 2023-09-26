@@ -5,9 +5,9 @@ import (
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/global"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/rpc/rpcServer"
 	pb "github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/rpc/rpcv1"
+	"go.uber.org/zap"
 
 	"google.golang.org/grpc"
-	"log"
 	"net"
 )
 
@@ -15,14 +15,16 @@ func RPC() {
 	address := fmt.Sprintf("%s:%d", global.FXConfig.RPC.Host, global.FXConfig.RPC.Port)
 	listen, err := net.Listen("tcp", address)
 	if err != nil {
-		log.Fatalf("无法监听端口: %v", err)
+		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage,
+			zap.Any("err", fmt.Sprintf("RPC监听端口d%d失败：%v", global.FXConfig.RPC.Port, err)))
 	}
 
 	server := grpc.NewServer()
 	pb.RegisterDataUpdaterServer(server, &rpcServer.DataUpdate{})
-	log.Println("RPC服务启动")
+	global.FXLogger.Info("RPC服务启动")
 
 	if err := server.Serve(listen); err != nil {
-		log.Fatalf("无法启动RPC服务: %v", err)
+		global.FXLogger.Fatal(global.FXConfig.System.RPCErrorMessage,
+			zap.Any("err", fmt.Sprintf("RPC服务启动失败%v", err)))
 	}
 }

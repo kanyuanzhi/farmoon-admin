@@ -7,6 +7,7 @@ import (
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/global"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/model"
 	pb "github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/rpc/rpcv1"
+	"go.uber.org/zap"
 	"gorm.io/gorm/clause"
 )
 
@@ -17,6 +18,7 @@ type DataUpdate struct {
 func (server *DataUpdate) FetchOfficialDishes(c context.Context, req *pb.FetchOfficialDishesRequest) (*pb.FetchOfficialDishesResponse, error) {
 	var localDishesInfo map[uuid.UUID]int64
 	if err := json.Unmarshal(req.GetLocalDishesInfoJson(), &localDishesInfo); err != nil {
+		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
 
@@ -31,6 +33,7 @@ func (server *DataUpdate) FetchOfficialDishes(c context.Context, req *pb.FetchOf
 
 	var remoteDishes []model.SysDish
 	if err := global.FXDb.Where("is_official = ?", true).Select("uuid", "updated_at").Find(&remoteDishes).Error; err != nil {
+		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
 
@@ -55,9 +58,11 @@ func (server *DataUpdate) FetchOfficialDishes(c context.Context, req *pb.FetchOf
 	var localNeedUpdateDishes []model.SysDish
 
 	if err := global.FXDb.Where("uuid in ?", localNeedAddDishUUIDs).Find(&localNeedAddDishes).Error; err != nil {
+		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
 	if err := global.FXDb.Where("uuid in ?", localNeedUpdateDishUUIDs).Find(&localNeedUpdateDishes).Error; err != nil {
+		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
 
@@ -67,6 +72,7 @@ func (server *DataUpdate) FetchOfficialDishes(c context.Context, req *pb.FetchOf
 
 	var cuisines []model.SysCuisine
 	if err := global.FXDb.Find(&cuisines).Error; err != nil {
+		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
 	cuisinesBytes, _ := json.Marshal(cuisines)
@@ -84,16 +90,19 @@ func (server *DataUpdate) FetchOfficialDishes(c context.Context, req *pb.FetchOf
 func (server *DataUpdate) FetchCuisines(c context.Context, req *pb.FetchIngredientsRequest) (*pb.FetchIngredientsResponse, error) {
 	var ingredients []model.SysIngredient
 	if err := global.FXDb.Find(&ingredients).Error; err != nil {
+		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
 
 	var ingredientTypes []model.SysIngredientType
 	if err := global.FXDb.Find(&ingredientTypes).Error; err != nil {
+		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
 
 	var ingredientShapes []model.SysIngredientShape
 	if err := global.FXDb.Find(&ingredientShapes).Error; err != nil {
+		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
 
@@ -114,11 +123,13 @@ func (server *DataUpdate) SynchronizePersonalDishes(c context.Context, req *pb.S
 	// 先删除已经在本地删除的菜谱，并记录
 	var localDeletedDishUUIDs []uuid.UUID
 	if err := json.Unmarshal(req.GetLocalDeletedDishUuidsJson(), &localDeletedDishUUIDs); err != nil {
+		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
 
 	var remoteNeedDeleteDishesNumber int64
 	if err := global.FXDb.Where("uuid in ?", localDeletedDishUUIDs).Delete(&model.SysDish{}).Count(&remoteNeedDeleteDishesNumber).Error; err != nil {
+		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
 
@@ -133,6 +144,7 @@ func (server *DataUpdate) SynchronizePersonalDishes(c context.Context, req *pb.S
 	if len(userDeletedDishes) != 0 {
 		if err := global.FXDb.Clauses(clause.OnConflict{Columns: []clause.Column{{Name: "uuid"}}, DoNothing: true}).
 			Create(&userDeletedDishes).Error; err != nil {
+			global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 			return nil, err
 		}
 	}
@@ -147,6 +159,7 @@ func (server *DataUpdate) SynchronizePersonalDishes(c context.Context, req *pb.S
 	// bytes local_need_delete_dishes_uuids_json = 5;  // 本地需要删除的菜谱uuid
 	var localDishesInfo map[uuid.UUID]int64
 	if err := json.Unmarshal(req.GetLocalDishesInfoJson(), &localDishesInfo); err != nil {
+		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
 
@@ -166,6 +179,7 @@ func (server *DataUpdate) SynchronizePersonalDishes(c context.Context, req *pb.S
 	var remoteDishes []model.SysDish
 	if err := global.FXDb.Where("owner = ?", req.GetUserSerialNumber()).Select("uuid", "updated_at").
 		Find(&remoteDishes).Error; err != nil {
+		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
 
@@ -184,6 +198,7 @@ func (server *DataUpdate) SynchronizePersonalDishes(c context.Context, req *pb.S
 
 	var userAllDeletedDishes []model.SysUserDeletedDish
 	if err := global.FXDb.Where("owner = ?", req.GetUserSerialNumber()).Find(&userAllDeletedDishes).Error; err != nil {
+		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
 	userAllDeletedDishUUIDs := make(map[uuid.UUID]bool)
@@ -202,9 +217,11 @@ func (server *DataUpdate) SynchronizePersonalDishes(c context.Context, req *pb.S
 	}
 
 	if err := global.FXDb.Where("uuid in ?", localNeedAddDishUUIDs).Find(&localNeedAddDishes).Error; err != nil {
+		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
 	if err := global.FXDb.Where("uuid in ?", localNeedUpdateDishUUIDs).Find(&localNeedUpdateDishes).Error; err != nil {
+		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
 
@@ -241,6 +258,7 @@ func (server *DataUpdate) UploadPersonalDishes(c context.Context, req *pb.Upload
 	if len(remoteNeedAddDishes) != 0 {
 		if err := tx.Create(remoteNeedAddDishes).Error; err != nil {
 			tx.Rollback()
+			global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 			return nil, err
 		}
 	}
@@ -249,17 +267,20 @@ func (server *DataUpdate) UploadPersonalDishes(c context.Context, req *pb.Upload
 		for _, dish := range remoteNeedUpdateDishes {
 			if err := tx.Model(&model.SysDish{}).Where("uuid = ?", dish.UUID).Omit("id", "uuid").Updates(dish).Error; err != nil {
 				tx.Rollback()
+				global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 				return nil, err
 			}
 			// 将自动更新的updated_at字段更新为本地上传过来的值
 			if err := tx.Model(&model.SysDish{}).Where("uuid = ?", dish.UUID).Update("updated_at", dish.UpdatedAt).Error; err != nil {
 				tx.Rollback()
+				global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 				return nil, err
 			}
 		}
 	}
 
 	if err := tx.Commit().Error; err != nil {
+		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
 

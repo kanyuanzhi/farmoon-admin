@@ -14,6 +14,7 @@ type SeasoningApi struct {
 func (api *SeasoningApi) List(c *gin.Context) {
 	var seasonings []model.SysSeasoning
 	if err := global.FXDb.Order("pump").Find(&seasonings).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -52,6 +53,7 @@ func (api *SeasoningApi) Update(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Model(&seasoning).Select("name", "pump", "ratio").Updates(seasoning).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -73,6 +75,7 @@ func (api *SeasoningApi) Delete(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Delete(&seasoning).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -94,6 +97,7 @@ func (api *SeasoningApi) Add(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Create(&seasoning).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}

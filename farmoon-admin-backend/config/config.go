@@ -16,6 +16,7 @@ type System struct {
 	ErrorMessage                  string `yaml:"errorMessage"`
 	BindErrorMessage              string `yaml:"bindErrorMessage"`
 	LoadLocalResourceErrorMessage string `yaml:"loadLocalResourceErrorMessage"`
+	RPCErrorMessage               string `yaml:"rpcErrorMessage"`
 }
 
 type Postgres struct {

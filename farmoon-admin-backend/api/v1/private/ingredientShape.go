@@ -13,6 +13,7 @@ type IngredientShapeApi struct{}
 func (api *IngredientShapeApi) Count(c *gin.Context) {
 	var count int64
 	if err := global.FXDb.Model(&model.SysIngredientShape{}).Count(&count).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -27,6 +28,7 @@ func (api *IngredientShapeApi) Count(c *gin.Context) {
 func (api *IngredientShapeApi) List(c *gin.Context) {
 	var ingredientShapes []model.SysIngredientShape
 	if err := global.FXDb.Order("sort").Find(&ingredientShapes).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -62,6 +64,7 @@ func (api *IngredientShapeApi) Add(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Create(&ingredientShape).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -92,6 +95,7 @@ func (api *IngredientShapeApi) Update(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Model(&ingredientShape).Select("name", "un_deletable").Updates(ingredientShape).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -116,12 +120,14 @@ func (api *IngredientShapeApi) UpdateSorts(c *gin.Context) {
 		}
 		if err := tx.Model(&sysIngredientShape).Select("sort").Updates(sysIngredientShape).Error; err != nil {
 			tx.Rollback()
+			global.FXLogger.Error(err.Error())
 			response.ErrorMessage(c, err.Error())
 			return
 		}
 	}
 
 	if err := tx.Commit().Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -143,6 +149,7 @@ func (api *IngredientShapeApi) Delete(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Delete(&ingredientShape).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
