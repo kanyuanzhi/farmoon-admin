@@ -2,13 +2,16 @@ package boot
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/global"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/middleware"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/router/v1"
 )
 
 func Router() *gin.Engine {
 	router := gin.Default()
-	gin.SetMode(gin.ReleaseMode)
+	if global.FXConfig.System.GinReleaseMode {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	router.Use(middleware.Cors())
 
 	apiV1 := router.Group("/farmoon-api/v1")

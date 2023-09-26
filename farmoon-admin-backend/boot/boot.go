@@ -7,7 +7,6 @@ import (
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/global"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/utils"
 	"log"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -52,7 +51,7 @@ func logo(port int) {
 	fmt.Println("Github: https://github.com/kanyuanzhi/farmoon-admin ")
 	fmt.Println("Expecting Your Star!")
 	fmt.Printf("System started, listening port: %d...\n", port)
-	slog.Info(fmt.Sprintf("System started, listening port: %d", port))
+	global.FXLogger.Info(fmt.Sprintf("System started, listening port: %d", port))
 }
 
 func init() {

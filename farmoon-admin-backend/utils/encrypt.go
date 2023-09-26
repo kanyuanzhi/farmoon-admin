@@ -1,10 +1,14 @@
 package utils
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/global"
+	"golang.org/x/crypto/bcrypt"
+)
 
 func EncodeBcrypt(str string) (hs string, err error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(str), bcrypt.DefaultCost)
 	if err != nil {
+		global.FXLogger.Error("encode bcrypt error" + err.Error())
 		return "", err
 	}
 	return string(hash), nil

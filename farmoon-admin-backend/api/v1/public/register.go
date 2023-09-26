@@ -19,10 +19,12 @@ func (api *RegisterApi) Register(c *gin.Context) {
 		return
 	}
 	if registerRequest.RepeatPassword != registerRequest.Password {
+		global.FXLogger.Error(registerRequest.Username + "两次输入的密码不一致")
 		response.ErrorMessage(c, "两次输入的密码不一致")
 		return
 	}
 	if result := global.FXDb.Where("username = ?", registerRequest.Username).First(&model.SysUser{}); result.RowsAffected == 1 {
+		global.FXLogger.Error(registerRequest.Username + "用户名已存在")
 		response.ErrorMessage(c, "用户名已存在")
 		return
 	}
@@ -43,6 +45,7 @@ func (api *RegisterApi) Register(c *gin.Context) {
 	}
 
 	if result := global.FXDb.Create(&user); result.Error != nil {
+		global.FXLogger.Error(registerRequest.Username + "注册失败")
 		response.ErrorMessage(c, result.Error.Error())
 		return
 	}

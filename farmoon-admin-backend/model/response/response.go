@@ -3,7 +3,6 @@ package response
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/global"
-	"log/slog"
 	"net/http"
 )
 
@@ -34,7 +33,6 @@ func SuccessMessageData(c *gin.Context, data interface{}, message string) {
 }
 
 func ErrorMessage(c *gin.Context, message string) {
-	slog.Warn(message)
 	Result(c, global.FXConfig.System.ErrorCode, nil, message)
 }
 
