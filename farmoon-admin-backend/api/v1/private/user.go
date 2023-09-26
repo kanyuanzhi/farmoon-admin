@@ -24,12 +24,14 @@ func (api *UserApi) Count(c *gin.Context) {
 	filterDb, err := request.GenerateUserQueryCondition(countUsersRequest.Filter, countUsersRequest.EnableGenderFilter,
 		countUsersRequest.GenderFilter, countUsersRequest.EnableRolesFilter, strings.Split(countUsersRequest.RolesFilter, ","))
 	if err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
 
 	var count int64
 	if err := filterDb.Count(&count).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -51,6 +53,7 @@ func (api *UserApi) List(c *gin.Context) {
 	filterDb, err := request.GenerateUserQueryCondition(listUsersRequest.Filter, listUsersRequest.EnableGenderFilter,
 		listUsersRequest.GenderFilter, listUsersRequest.EnableRolesFilter, strings.Split(listUsersRequest.RolesFilter, ","))
 	if err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -58,6 +61,7 @@ func (api *UserApi) List(c *gin.Context) {
 	var users []model.SysUser
 	if err := filterDb.Limit(listUsersRequest.PageSize).Offset((listUsersRequest.PageIndex - 1) * listUsersRequest.PageSize).
 		Order("id").Find(&users).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -105,6 +109,7 @@ func (api *UserApi) Update(c *gin.Context) {
 
 	if err := global.FXDb.Model(&user).Select("nickname", "real_name", "gender", "mobile", "email").
 		Updates(user).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -127,6 +132,7 @@ func (api *UserApi) UpdateRoles(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Model(&user).Update("roles", user.Roles).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -151,6 +157,7 @@ func (api *UserApi) Delete(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Delete(&users).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -172,6 +179,7 @@ func (api *UserApi) UpdatePassword(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Model(&user).Update("password", user.Password).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -182,6 +190,7 @@ func (api *UserApi) UpdatePassword(c *gin.Context) {
 func (api *UserApi) UpdateAvatar(c *gin.Context) {
 	file, err := c.FormFile("img")
 	if err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -189,6 +198,7 @@ func (api *UserApi) UpdateAvatar(c *gin.Context) {
 	// Open the uploaded file
 	src, err := file.Open()
 	if err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -198,6 +208,7 @@ func (api *UserApi) UpdateAvatar(c *gin.Context) {
 	fileData := make([]byte, file.Size)
 	_, err = src.Read(fileData)
 	if err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -206,11 +217,11 @@ func (api *UserApi) UpdateAvatar(c *gin.Context) {
 	id, _ := strconv.Atoi(idStr)
 	user := model.SysUser{
 		FXModel: global.FXModel{Id: uint(id)},
-
-		Avatar: fileData,
+		Avatar:  fileData,
 	}
 
 	if err := global.FXDb.Model(&user).Update("avatar", user.Avatar).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}
@@ -226,6 +237,7 @@ func (api *UserApi) Add(c *gin.Context) {
 	}
 
 	if result := global.FXDb.Where("username = ?", addUserRequest.Username).First(&model.SysUser{}); result.RowsAffected == 1 {
+		global.FXLogger.Error(addUserRequest.Username + "用户名已存在")
 		response.ErrorMessage(c, "用户名已存在")
 		return
 	}
@@ -251,6 +263,7 @@ func (api *UserApi) Add(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Create(&user).Error; err != nil {
+		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
 	}

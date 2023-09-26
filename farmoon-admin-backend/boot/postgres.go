@@ -16,13 +16,13 @@ func Postgres() *gorm.DB {
 	postgresConfig := config.PostgresConfig(fxPostgresConfig)
 	gormConfig := config.GormConfig()
 	if db, err := gorm.Open(postgres.New(postgresConfig), &gormConfig); err != nil {
-		slog.Error("Connect postgres failed")
+		global.FXLogger.Error("Connect postgres failed: " + err.Error())
 		return nil
 	} else {
-		slog.Info("Connect postgres success")
+		global.FXLogger.Info("Connect postgres success")
 		sqlDB, err := db.DB()
 		if err != nil {
-			slog.Error("Get postgres instance failed")
+			global.FXLogger.Error("Get postgres instance failed: " + err.Error())
 			return nil
 		}
 		sqlDB.SetMaxOpenConns(10) // 最大打开连接数
@@ -42,7 +42,7 @@ func InitDb() error {
 	global.FXDb = Postgres()
 	err := global.FXDb.AutoMigrate(migrateList...)
 	if err != nil {
-		slog.Error(err.Error())
+		global.FXLogger.Error(err.Error())
 		return err
 	}
 
@@ -61,15 +61,16 @@ func createDatabase() error {
 	defer func(db *sql.DB) {
 		err := db.Close()
 		if err != nil {
-			slog.Error(err.Error())
+			global.FXLogger.Error("Get postgres instance failed: " + err.Error())
 		}
 	}(sqlDB)
 	if err = sqlDB.Ping(); err != nil {
-		slog.Error(err.Error())
+		global.FXLogger.Error("Get postgres instance failed: " + err.Error())
 		return err
 	}
 	if _, err = sqlDB.Exec(createSql); err != nil {
-		slog.Error(err.Error())
+		global.FXLogger.Error("Get postgres instance failed: " + err.Error())
+		return err
 	}
 	return err
 }

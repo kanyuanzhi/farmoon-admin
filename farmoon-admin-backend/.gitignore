@@ -7,3 +7,8 @@
 *.ntvs*
 *.njsproj
 *.sln
+
+farmoon-admin-backend
+
+logs
+*.log

@@ -5,13 +5,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/global"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/model"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 func ShouldBindJSON(c *gin.Context, obj interface{}) error {
 	if err := c.ShouldBindJSON(obj); err != nil {
-		//global.GqaLogger.Error(global.GqaConfig.System.BindError, zap.Any("err", err))
-		//response.ErrorMessage(c, err.Error())
+		global.FXLogger.Error(global.FXConfig.System.BindErrorMessage, zap.Any("err", err))
 		return err
 	}
 	return nil
@@ -19,8 +19,7 @@ func ShouldBindJSON(c *gin.Context, obj interface{}) error {
 
 func ShouldBindQuery(c *gin.Context, obj interface{}) error {
 	if err := c.ShouldBindQuery(obj); err != nil {
-		//global.GqaLogger.Error(global.GqaConfig.System.BindError, zap.Any("err", err))
-		//response.ErrorMessage(c, err.Error())
+		global.FXLogger.Error(global.FXConfig.System.BindErrorMessage, zap.Any("err", err))
 		return err
 	}
 	return nil
@@ -32,9 +31,6 @@ func GenerateUserQueryCondition(filter string, enableGenderFilter bool, genderFi
 	if enableGenderFilter {
 		filterDb = filterDb.Where("gender = ?", genderFilter)
 	}
-
-	//a := strings.Split("", ",")
-	//fmt.Println(a, len(a))
 
 	if enableRolesFilter {
 		if rolesFilter[0] == "" {

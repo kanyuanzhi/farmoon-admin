@@ -21,11 +21,13 @@ func (api *LoginApi) Login(c *gin.Context) {
 
 	var user model.SysUser
 	if result := global.FXDb.Where("username = ?", loginRequest.Username).First(&user); result.RowsAffected == 0 {
+		global.FXLogger.Error(user.Username + "用户不存在")
 		response.ErrorMessage(c, "用户名或密码错误")
 		return
 	}
 
 	if !utils.CompareBcrypt(user.Password, loginRequest.Password) {
+		global.FXLogger.Error(user.Username + "用户密码错误")
 		response.ErrorMessage(c, "用户名或密码错误")
 		return
 	}

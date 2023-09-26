@@ -1,9 +1,12 @@
 system:
   port: 10000
+  ginReleaseMode: false
   successCode: 1
   successMessage: Success
   errorCode: 0
   errorMessage: Failed
+  bindErrorMessage: Bind Error
+  loadLocalResourceErrorMessage: Load Local Resource Error
 
 postgres:
   host: 127.0.0.1
@@ -11,3 +14,14 @@ postgres:
   user: postgres
   password: 123456
   database: farmoon_admin
+
+zap:
+  prefix: '[farmoon-admin]'
+  level: info
+  path: logs
+  filename: fx-log
+  maxSize: 200
+  maxBackups: 10
+  maxAge: 8
+  osStdout: true
+  jsonEncoder: false

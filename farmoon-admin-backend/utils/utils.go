@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/global"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 	"log"
 	"os"
 )
@@ -29,6 +31,7 @@ func LoadLocalImage(path string) ([]byte, error) {
 	imagePath := path
 	imageData, err := os.ReadFile(imagePath)
 	if err != nil {
+		global.FXLogger.Error(global.FXConfig.System.LoadLocalResourceErrorMessage, zap.Any("err", err))
 		return nil, err
 	}
 	return imageData, nil

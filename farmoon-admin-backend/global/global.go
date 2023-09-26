@@ -2,12 +2,14 @@ package global
 
 import (
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/config"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 var (
 	FXConfig config.Config
 	FXDb     *gorm.DB
+	FXLogger *zap.Logger
 )
 
 type FXModel struct {
