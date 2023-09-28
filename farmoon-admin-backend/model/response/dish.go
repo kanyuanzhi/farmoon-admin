@@ -21,3 +21,7 @@ type AddDish struct {
 type UpdateDishWithSteps struct {
 	Dish model.DishInfo `json:"dish"`
 }
+
+type CopyDish struct {
+	Dish model.DishInfo `json:"dish"`
+}

@@ -31,7 +31,9 @@ func InitPrivateRouter(routerGroup *gin.RouterGroup) {
 	routerGroup.DELETE("dish/delete", dishApi.Delete)
 	routerGroup.POST("dish/update-image", dishApi.UpdateImage)
 	routerGroup.POST("dish/add", dishApi.Add)
+	routerGroup.POST("dish/copy", dishApi.Copy)
 	routerGroup.PUT("dish/update-with-steps", dishApi.UpdateWithSteps)
+	routerGroup.PUT("dish/topping", dishApi.Topping)
 
 	seasoningApi := &private.SeasoningApi{}
 	routerGroup.GET("seasoning/list", seasoningApi.List)
@@ -45,6 +47,7 @@ func InitPrivateRouter(routerGroup *gin.RouterGroup) {
 	routerGroup.POST("ingredient/add", ingredientApi.Add)
 	routerGroup.PUT("ingredient/update", ingredientApi.Update)
 	routerGroup.DELETE("ingredient/delete", ingredientApi.Delete)
+	routerGroup.PUT("ingredient/topping", ingredientApi.Topping)
 
 	ingredientTypeApi := &private.IngredientTypeApi{}
 	routerGroup.GET("ingredient-type/list", ingredientTypeApi.List)

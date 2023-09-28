@@ -26,8 +26,12 @@
             <td class="text-center">
               <q-btn dense round flat icon="mdi-delete" size="sm" color="grey-6"
                      :disable="row.unDeletable"
-                     @click="deleteRow(row)"/>
-              <q-btn dense class="drag-item q-ml-sm" round flat icon="drag_indicator" size="sm" color="primary"/>
+                     @click="deleteRow(row)">
+                <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">删除</q-tooltip>
+              </q-btn>
+              <q-btn dense class="drag-item q-ml-sm" round flat icon="drag_indicator" size="sm" color="primary">
+                <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">拖拽排序</q-tooltip>
+              </q-btn>
             </td>
           </tr>
           </tbody>
@@ -38,133 +42,133 @@
 </template>
 
 <script setup>
-import { nextTick, onMounted, onUnmounted, ref } from 'vue'
-import { deleteAPI, getAPI, postAPI, putAPI } from 'src/api'
-import { Dialog, Notify } from 'quasar'
-import { random, remove } from 'lodash'
-import Sortable from 'sortablejs'
-import { cloneDeep } from 'lodash/lang'
+import { nextTick, onMounted, onUnmounted, ref } from "vue";
+import { deleteAPI, getAPI, postAPI, putAPI } from "src/api";
+import { Dialog, Notify } from "quasar";
+import { random, remove } from "lodash";
+import Sortable from "sortablejs";
+import { cloneDeep } from "lodash/lang";
 
-const loading = ref(false)
+const loading = ref(false);
 
-const defaultPageIndex = 1
-const defaultPageSize = 10
+const defaultPageIndex = 1;
+const defaultPageSize = 10;
 
-const rows = ref([])
+const rows = ref([]);
 
-const tableBody = ref(null)
+const tableBody = ref(null);
 onMounted(async () => {
   const sortable = new Sortable(tableBody.value, {
     onEnd: onSortEnd,
-    dragClass: 'sortable-drag',
-    chosenClass: 'sortable-chosen',
+    dragClass: "sortable-drag",
+    chosenClass: "sortable-chosen",
     animation: 150,  // ms, animation speed moving items when sorting, `0` — without animation
-    easing: 'cubic-bezier(1, 0, 0, 1)', // Easing for animation. Defaults to null. See https://easings.net/ for examples.
-    handle: '.drag-item',  // Specifies which items inside the element should be draggable
-  })
+    easing: "cubic-bezier(1, 0, 0, 1)", // Easing for animation. Defaults to null. See https://easings.net/ for examples.
+    handle: ".drag-item",  // Specifies which items inside the element should be draggable
+  });
   onUnmounted(() => {
-    sortable.destroy()
-  })
-  loading.value = true
-  await getRowsNumber()
-  await getRows(defaultPageIndex, defaultPageSize)
-  loading.value = false
-})
+    sortable.destroy();
+  });
+  loading.value = true;
+  await getRowsNumber();
+  await getRows(defaultPageIndex, defaultPageSize);
+  loading.value = false;
+});
 
 const getRowsNumber = async () => {
-  const { data } = await getAPI('/private/ingredient-shape/count')
-}
+  const { data } = await getAPI("/private/ingredient-shape/count");
+};
 
 const getRows = async (pageIndex, pageSize) => {
-  const { data } = await getAPI('/private/ingredient-shape/list', {
+  const { data } = await getAPI("/private/ingredient-shape/list", {
     pageIndex: pageIndex,
     pageSize: pageSize,
-  })
+  });
   if (data.ingredientShapes !== undefined) {
-    rows.value.splice(0, rows.value.length, ...data.ingredientShapes)
+    rows.value.splice(0, rows.value.length, ...data.ingredientShapes);
   } else {
-    rows.value.splice(0, rows.value.length, ...data.data.ingredientShapes)
+    rows.value.splice(0, rows.value.length, ...data.data.ingredientShapes);
   }
   rows.value.forEach((item, index) => {
-    item.index = index + 1
-  })
-}
+    item.index = index + 1;
+  });
+};
 
 const addRow = async () => {
   Dialog.create({
-    message: '请输入食材形状',
+    message: "请输入食材形状",
     prompt: {
-      model: '',
-      type: 'text', // optional
+      model: "",
+      type: "text", // optional
     },
-    ok: '确定',
-    cancel: '取消',
+    ok: "确定",
+    cancel: "取消",
     persistent: true,
   }).onOk(async (name) => {
     try {
-      const { data, message } = await postAPI('private/ingredient-shape/add', { name: name })
-      Notify.create(message)
-      rows.value.unshift(data.ingredientShape)
+      const { data, message } = await postAPI("private/ingredient-shape/add", { name: name });
+      Notify.create(message);
+      rows.value.unshift(data.ingredientShape);
     } catch (e) {
-      console.log(e.toString())
+      console.log(e.toString());
     }
   }).onCancel(() => {
   }).onDismiss(() => {
-  })
-}
+  });
+};
 
 const updateRow = async (row) => {
   try {
     const newData = {
       id: row.id,
       name: row.name,
-    }
-    const { message } = await putAPI('private/ingredient-shape/update', newData)
-    Notify.create(message)
+    };
+    const { message } = await putAPI("private/ingredient-shape/update", newData);
+    Notify.create(message);
   } catch (e) {
-    console.log(e.toString())
+    console.log(e.toString());
   }
-}
+};
 
 const deleteRow = async (row) => {
-  const { id } = row
-  console.log(id)
+  const { id } = row;
+  console.log(id);
   Dialog.create({
-    message: '确认删除？',
-    ok: '确认',
-    cancel: '取消',
-    focus: 'none',
+    message: "确认删除？",
+    ok: "确认",
+    cancel: "取消",
+    focus: "none",
   }).onOk(async () => {
     try {
-      const { message } = await deleteAPI('/private/ingredient-shape/delete', { id: id })
-      remove(rows.value, (row) => row.id === id)
-      Notify.create(message)
+      const { message } = await deleteAPI("/private/ingredient-shape/delete", { id: id });
+      remove(rows.value, (row) => row.id === id);
+      Notify.create(message);
     } catch (e) {
-      console.log(e.toString())
+      console.log(e.toString());
     }
   }).onCancel(() => {
 
   }).onDismiss(() => {
-  })
-}
+  });
+};
 
 const onSortEnd = async (event) => {
   try {
-    const draggedItem = rows.value[event.oldIndex]
-    rows.value.splice(event.oldIndex, 1)
-    rows.value.splice(event.newIndex, 0, draggedItem)
+    const draggedItem = rows.value[event.oldIndex];
+    rows.value.splice(event.oldIndex, 1);
+    rows.value.splice(event.newIndex, 0, draggedItem);
     rows.value.forEach((row, index) => {
-      row.sort = index + 1
-    })
-    const { message } = await putAPI('/private/ingredient-type/update-sorts', { ingredientShapes: rows.value })
+      row.sort = index + 1;
+    });
+    const { message } = await putAPI("/private/ingredient-type/update-sorts", { ingredientShapes: rows.value });
     Notify.create({
       message: message,
-      type: 'positive',
-    })
+      type: "positive",
+    });
   } catch (e) {
-    console.log(e.toString())
+    console.log(e.toString());
   }
-}
+};
 </script>
 
 <style scoped lang="scss">

@@ -157,3 +157,49 @@ func (api *IngredientApi) Delete(c *gin.Context) {
 
 	response.SuccessMessage(c, "删除成功")
 }
+
+func (api *IngredientApi) Topping(c *gin.Context) {
+	var toppingIngredientRequest request.ToppingIngredient
+	if err := request.ShouldBindJSON(c, &toppingIngredientRequest); err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	toppingIngredient := model.SysIngredient{
+		FXModel: global.FXModel{
+			Id: toppingIngredientRequest.Id,
+		},
+	}
+
+	if err := global.FXDb.Model(&toppingIngredient).Update("sort", 1).Error; err != nil {
+		global.FXLogger.Error(err.Error())
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	var ingredients []model.SysIngredient
+	if err := global.FXDb.Not("id = ?", toppingIngredient.Id).Order("sort, updated_at asc").
+		Select("id", "sort").Find(&ingredients).Error; err != nil {
+		global.FXLogger.Error(err.Error())
+		response.ErrorMessage(c, err.Error())
+	}
+
+	for index, ingredient := range ingredients {
+		if err := global.FXDb.Model(&ingredient).Update("sort", int64(index)+2).Error; err != nil {
+			global.FXLogger.Error(err.Error())
+			response.ErrorMessage(c, err.Error())
+			return
+		}
+	}
+
+	response.SuccessMessage(c, "置顶成功")
+}
+
+func (api *IngredientApi) getIngredientNumber(c *gin.Context) (int64, error) {
+	var ingredientNumber int64
+	if err := global.FXDb.Model(&model.SysIngredient{}).Count(&ingredientNumber).Error; err != nil {
+		response.ErrorMessage(c, err.Error())
+		return 0, err
+	}
+	return ingredientNumber, nil
+}

@@ -41,7 +41,9 @@
             </td>
             <td class="text-center">
               <q-btn dense round flat icon="mdi-delete" size="sm" color="grey-6"
-                     :disable="seasoning.unDeletable" @click="deleteSeasoning(seasoning.id, index)"/>
+                     :disable="seasoning.unDeletable" @click="deleteSeasoning(seasoning.id, index)">
+                <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">删除</q-tooltip>
+              </q-btn>
             </td>
           </tr>
           </tbody>
@@ -53,85 +55,85 @@
 </template>
 
 <script setup>
-import { onBeforeMount, onMounted, onUnmounted, ref } from 'vue'
-import { deleteAPI, getAPI, postAPI, putAPI } from 'src/api'
-import { Dialog, Notify } from 'quasar'
-import Sortable from 'sortablejs'
+import { onBeforeMount, onMounted, onUnmounted, ref } from "vue";
+import { deleteAPI, getAPI, postAPI, putAPI } from "src/api";
+import { Dialog, Notify } from "quasar";
+import Sortable from "sortablejs";
 
-const seasonings = ref([])
+const seasonings = ref([]);
 
 onBeforeMount(async () => {
-  const { data } = await getAPI('/private/seasoning/list')
-  seasonings.value = data.seasonings
-})
+  const { data } = await getAPI("/private/seasoning/list");
+  seasonings.value = data.seasonings;
+});
 
-const tableBody = ref(null)
+const tableBody = ref(null);
 onMounted(async () => {
 
-})
+});
 
 const onUpdate = async (seasoning) => {
   try {
-    const { message } = await putAPI('/private/seasoning/update', {
+    const { message } = await putAPI("/private/seasoning/update", {
       id: seasoning.id,
       name: seasoning.name,
       pump: seasoning.pump,
       ratio: seasoning.ratio,
-    })
+    });
     Notify.create({
       message: message,
-      type: 'positive',
-    })
+      type: "positive",
+    });
   } catch (e) {
-    console.log(e.toString())
+    console.log(e.toString());
   }
-}
+};
 
 const deleteSeasoning = async (id, index) => {
   Dialog.create({
-    message: '确认删除？',
-    ok: '确认',
-    cancel: '取消',
-    focus: 'none',
+    message: "确认删除？",
+    ok: "确认",
+    cancel: "取消",
+    focus: "none",
   }).onOk(async () => {
     try {
-      const { message } = await deleteAPI('/private/seasoning/delete', { id: id })
-      seasonings.value.splice(index, 1)
+      const { message } = await deleteAPI("/private/seasoning/delete", { id: id });
+      seasonings.value.splice(index, 1);
       Notify.create({
         message: message,
-        type: 'positive',
-      })
+        type: "positive",
+      });
     } catch (e) {
-      console.log(e.toString())
+      console.log(e.toString());
     }
-  })
-}
+  });
+};
 
 const addSeasoning = async () => {
   Dialog.create({
-    message: '请输入调料名称',
+    message: "请输入调料名称",
     prompt: {
-      model: '',
-      type: 'text', // optional
+      model: "",
+      type: "text", // optional
     },
-    ok: '确定',
-    cancel: '取消',
+    ok: "确定",
+    cancel: "取消",
     persistent: true,
   }).onOk(async (name) => {
     try {
-      const { data, message } = await postAPI('private/seasoning/add', { name: name })
+      const { data, message } = await postAPI("private/seasoning/add", { name: name });
       Notify.create({
         message: message,
-        type: 'positive',
-      })
-      seasonings.value.unshift(data.seasoning)
+        type: "positive",
+      });
+      seasonings.value.unshift(data.seasoning);
     } catch (e) {
-      console.log(e.toString())
+      console.log(e.toString());
     }
   }).onCancel(() => {
   }).onDismiss(() => {
-  })
-}
+  });
+};
 </script>
 
 <style lang="scss" scoped>

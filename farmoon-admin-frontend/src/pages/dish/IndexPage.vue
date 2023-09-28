@@ -20,8 +20,8 @@
         <q-checkbox dense v-model="scope.selected"/>
       </template>
       <template v-slot:top="scope">
-        <q-btn label="添加菜谱" color="primary"/>
-        <q-btn v-if="!isDeleteInBatch" class="q-ml-sm" label="批量删除菜谱" color="grey-6"
+        <q-btn label="添加菜品" color="primary" @click="router.push('/dish/edit');"/>
+        <q-btn v-if="!isDeleteInBatch" class="q-ml-sm" label="批量删除菜品" color="grey-6"
                @click.prevent="isDeleteInBatch=true"/>
         <template v-else>
           <q-btn outline class="q-ml-sm" label="取消删除" color="grey-6" @click="deleteCancel"/>
@@ -96,12 +96,24 @@
             <!--            </q-popup-edit>-->
           </q-td>
           <q-td key="operate" :props="props">
-            <q-btn dense round flat icon="edit" size="sm" color="teal-6" @click="editDish(props.row)"/>
-            <q-btn class="q-ml-sm" dense round flat icon="content_copy" size="sm" color="teal-6"/>
-            <q-btn class="q-ml-sm" dense round flat icon="qr_code" size="sm" color="teal-6"/>
-            <q-btn class="q-ml-sm" dense round flat icon="publish" size="sm" color="primary"/>
+            <q-btn dense round flat icon="edit" size="sm" color="teal-6" @click="editDish(props.row)">
+              <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">编辑</q-tooltip>
+            </q-btn>
+            <q-btn class="q-ml-sm" dense round flat icon="content_copy" size="sm" color="teal-6"
+                   @click="copyRow(props.row)">
+              <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">复制</q-tooltip>
+            </q-btn>
+            <q-btn class="q-ml-sm" dense round flat icon="qr_code" size="sm" color="teal-6">
+              <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">导出二维码（暂不能使用）</q-tooltip>
+            </q-btn>
+            <q-btn class="q-ml-sm" dense round flat icon="publish" size="sm" color="primary"
+                   @click="toppingRow(props.row)">
+              <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">置顶</q-tooltip>
+            </q-btn>
             <q-btn class="q-ml-sm" dense round flat icon="delete" size="sm" color="grey-6"
-                   @click="deleteRows([props.row])"/>
+                   @click="deleteRows([props.row])">
+              <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">删除</q-tooltip>
+            </q-btn>
           </q-td>
         </q-tr>
       </template>
@@ -111,120 +123,120 @@
 </template>
 
 <script setup>
-import { onBeforeMount, onMounted, ref } from 'vue'
-import { deleteAPI, getAPI, putAPI } from 'src/api'
-import { Dialog, Notify } from 'quasar'
-import { remove } from 'lodash'
-import DishImageUploader from 'pages/dish/components/DishImageUploader.vue'
-import { getCuisineInfo } from 'pages/dish/index'
-import { useDishStore } from 'stores/dish'
-import { useRouter } from 'vue-router'
+import { onBeforeMount, onMounted, ref } from "vue";
+import { deleteAPI, getAPI, postAPI, putAPI } from "src/api";
+import { Dialog, Notify } from "quasar";
+import { remove } from "lodash";
+import DishImageUploader from "pages/dish/components/DishImageUploader.vue";
+import { getCuisineInfo } from "pages/dish/index";
+import { useDishStore } from "stores/dish";
+import { useRouter } from "vue-router";
 
-const cuisineOptions = ref([])
-const cuisineMap = ref({})
+const cuisineOptions = ref([]);
+const cuisineMap = ref({});
 
-const enableCuisineFilter = ref(false)
-const cuisineFilter = ref([])
+const enableCuisineFilter = ref(false);
+const cuisineFilter = ref([]);
 
-const filter = ref('')
-const isDeleteInBatch = ref(false)
+const filter = ref("");
+const isDeleteInBatch = ref(false);
 
-const loading = ref(false)
+const loading = ref(false);
 
-const table = ref(null)
-const rows = ref([])
+const table = ref(null);
+const rows = ref([]);
 
 const columns = [
-  { name: 'index', align: 'center', label: '#', field: 'index', headerStyle: 'width: 5%' },
-  { name: 'uuid', align: 'center', label: 'uuid', field: 'uuid', headerStyle: 'width: 20%' },
-  { name: 'image', align: 'center', label: '图片', field: 'image', headerStyle: 'width: 10%' },
-  { name: 'name', required: true, align: 'center', label: '名称', field: 'name', headerStyle: 'width: 20%' },
-  { name: 'cuisine', align: 'center', label: '菜系', field: 'cuisine', headerStyle: 'width: 10%' },
-  { name: 'customSteps', align: 'center', label: '口味', field: 'customSteps', headerStyle: 'width: 20%' },
-  { name: 'operate', align: 'center', label: '操作', headerStyle: 'width: 15%' },
-]
+  { name: "index", align: "center", label: "#", field: "index", headerStyle: "width: 5%" },
+  { name: "uuid", align: "center", label: "uuid", field: "uuid", headerStyle: "width: 20%" },
+  { name: "image", align: "center", label: "图片", field: "image", headerStyle: "width: 10%" },
+  { name: "name", required: true, align: "center", label: "名称", field: "name", headerStyle: "width: 20%" },
+  { name: "cuisine", align: "center", label: "菜系", field: "cuisine", headerStyle: "width: 10%" },
+  { name: "customSteps", align: "center", label: "口味", field: "customSteps", headerStyle: "width: 20%" },
+  { name: "operate", align: "center", label: "操作", headerStyle: "width: 15%" },
+];
 
-const selectedRows = ref([])
+const selectedRows = ref([]);
 const getSelectedString = () => {
-  return selectedRows.value.length === 0 ? '' : `已选中${selectedRows.value.length}条记录`
-}
+  return selectedRows.value.length === 0 ? "" : `已选中${selectedRows.value.length}条记录`;
+};
 
-const defaultPageIndex = 1
-const defaultPageSize = 10
-const startRow = ref(1)
+const defaultPageIndex = 1;
+const defaultPageSize = 10;
+const startRow = ref(1);
 
 const pagination = ref({
-  sortBy: 'desc',
+  sortBy: "desc",
   descending: false,
   page: defaultPageIndex,
   rowsPerPage: defaultPageSize,
   rowsNumber: 10,
-})
+});
 
 const getPaginationString = (firstRowIndex, endRowIndex, totalRowsNumber) => {
-  return `${firstRowIndex}-${endRowIndex}（${totalRowsNumber}）`
-}
+  return `${firstRowIndex}-${endRowIndex}（${totalRowsNumber}）`;
+};
 
-const dishImageUploader = ref(null)
+const dishImageUploader = ref(null);
 
 onMounted(async () => {
-  loading.value = true
-  const { options, map } = await getCuisineInfo()
-  cuisineOptions.value = options
-  cuisineMap.value = map
-  await getRowsNumber()
-  await getRows(defaultPageIndex, defaultPageSize)
-  loading.value = false
-})
+  loading.value = true;
+  const { options, map } = await getCuisineInfo();
+  cuisineOptions.value = options;
+  cuisineMap.value = map;
+  await getRowsNumber();
+  await getRows(defaultPageIndex, defaultPageSize);
+  loading.value = false;
+});
 
 const onRequest = async (props) => {
-  loading.value = true
-  await getRowsNumber()
-  const { page, rowsPerPage, sortBy, descending } = props.pagination
-  startRow.value = (page - 1) * rowsPerPage + 1
-  const pageSize = rowsPerPage === 0 ? pagination.value.rowsNumber : rowsPerPage
-  await getRows(page, pageSize)
-  pagination.value.page = page
-  pagination.value.rowsPerPage = rowsPerPage
-  pagination.value.sortBy = sortBy
-  pagination.value.descending = descending
-  loading.value = false
-}
+  loading.value = true;
+  await getRowsNumber();
+  const { page, rowsPerPage, sortBy, descending } = props.pagination;
+  startRow.value = (page - 1) * rowsPerPage + 1;
+  const pageSize = rowsPerPage === 0 ? pagination.value.rowsNumber : rowsPerPage;
+  await getRows(page, pageSize);
+  pagination.value.page = page;
+  pagination.value.rowsPerPage = rowsPerPage;
+  pagination.value.sortBy = sortBy;
+  pagination.value.descending = descending;
+  loading.value = false;
+};
 
 const getRowsNumber = async () => {
-  const { data } = await getAPI('/private/dish/count',
+  const { data } = await getAPI("/private/dish/count",
       {
         filter: filter.value.trim(),
         enableCuisineFilter: enableCuisineFilter.value,
-        cuisineFilter: cuisineFilter.value?.map((val) => val.value).join(','),
-      })
+        cuisineFilter: cuisineFilter.value?.map((val) => val.value).join(","),
+      });
   if (data.count !== undefined) {
-    pagination.value.rowsNumber = data.count
+    pagination.value.rowsNumber = data.count;
   } else {
-    pagination.value.rowsNumber = data.data.count
+    pagination.value.rowsNumber = data.data.count;
   }
-}
+};
 
 const getRows = async (pageIndex, pageSize) => {
-  const { data } = await getAPI('/private/dish/list', {
+  const { data } = await getAPI("/private/dish/list", {
     pageIndex: pageIndex,
     pageSize: pageSize,
     filter: filter.value.trim(),
     enableCuisineFilter: enableCuisineFilter.value,
-    cuisineFilter: cuisineFilter.value?.map((val) => val.value).join(','),
-  })
+    cuisineFilter: cuisineFilter.value?.map((val) => val.value).join(","),
+  });
   if (data.dishes !== undefined) {
-    rows.value.splice(0, rows.value.length, ...data.dishes)
+    rows.value.splice(0, rows.value.length, ...data.dishes);
   } else {
-    rows.value.splice(0, rows.value.length, ...data.data.dishes)
+    rows.value.splice(0, rows.value.length, ...data.data.dishes);
   }
   rows.value.forEach((item, index) => {
-    item.index = index + startRow.value
+    item.index = index + startRow.value;
     if (item.roles === null) {
-      item.roles = []
+      item.roles = [];
     }
-  })
-}
+  });
+};
 
 const updateRow = async (row) => {
   try {
@@ -232,54 +244,75 @@ const updateRow = async (row) => {
       id: row.id,
       name: row.name,
       cuisine: row.cuisine,
-    }
-    const { message } = await putAPI('private/dish/update', newData)
-    Notify.create(message)
+    };
+    const { message } = await putAPI("private/dish/update", newData);
+    Notify.create(message);
   } catch (e) {
-    console.log(e.toString())
+    console.log(e.toString());
   }
-}
+};
 
 const deleteRows = async (selectedRows) => {
   if (selectedRows.length === 0) {
     Notify.create({
-      message: '请选择要删除的菜谱',
-      type: 'warning',
-    })
-    return
+      message: "请选择要删除的菜品",
+      type: "warning",
+    });
+    return;
   }
   Dialog.create({
-    message: '确认删除？',
-    ok: '确认',
-    cancel: '取消',
-    focus: 'none',
+    message: "确认删除？",
+    ok: "确认",
+    cancel: "取消",
+    focus: "none",
   }).onOk(async () => {
     try {
-      const ids = selectedRows.map((row) => row.id)
-      const { message } = await deleteAPI('/private/dish/delete', { ids: ids })
-      remove(rows.value, (row) => ids.includes(row.id))
-      Notify.create(message)
+      const ids = selectedRows.map((row) => row.id);
+      const { message } = await deleteAPI("/private/dish/delete", { ids: ids });
+      await onRequest(table.value);
+      Notify.create(message);
     } catch (e) {
-      console.log(e.toString())
+      console.log(e.toString());
     }
-  })
-}
+  });
+};
+
+const copyRow = async (row) => {
+  try {
+    const { message, data } = await postAPI("private/dish/copy", { id: row.id });
+    Notify.create(message);
+    await onRequest(table.value);
+    // rows.value.push(data.dish);
+  } catch (e) {
+    console.log(e.toString());
+  }
+};
+
+const toppingRow = async (row) => {
+  try {
+    const { message, data } = await putAPI("private/dish/topping", { id: row.id });
+    Notify.create(message);
+    await onRequest(table.value);
+  } catch (e) {
+    console.log(e.toString());
+  }
+};
 
 const deleteCancel = () => {
-  isDeleteInBatch.value = false
-  selectedRows.value = []
-}
+  isDeleteInBatch.value = false;
+  selectedRows.value = [];
+};
 
 const onUpdateImageSuccess = (imageUrl, fromObj) => {
-  fromObj.image = imageUrl
-}
+  fromObj.image = imageUrl;
+};
 
-const dishStore = useDishStore()
-const router = useRouter()
+const dishStore = useDishStore();
+const router = useRouter();
 const editDish = (row) => {
-  dishStore.setEditingDish(row)
-  router.push('/dish/edit')
-}
+  dishStore.setEditingDish(row);
+  router.push("/dish/edit");
+};
 </script>
 
 <style lang="scss" scoped>

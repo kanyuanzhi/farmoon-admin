@@ -129,7 +129,7 @@ export const asyncRoutes = [
         name: 'dishDisplay',
         component: () => import('pages/dish/IndexPage.vue'),
         meta: {
-          title: '菜谱浏览',
+          title: '菜品浏览',
           icon: 'format_list_bulleted',
           roles: ['admin', 'editor'],
         },
@@ -138,7 +138,7 @@ export const asyncRoutes = [
         name: 'dishEdit',
         component: () => import('pages/dish/edit/IndexPage.vue'),
         meta: {
-          title: '菜谱制作',
+          title: '菜品制作',
           icon: 'edit',
           roles: ['admin', 'editor'],
         },

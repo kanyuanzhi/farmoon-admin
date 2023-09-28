@@ -14,7 +14,7 @@ postgres:
   port: 5432
   user: postgres
   password: 123456
-  database: farmoon_admin
+  database: szzn_admin
 
 zap:
   prefix: '[farmoon-admin]'
@@ -26,7 +26,6 @@ zap:
   maxAge: 8
   osStdout: true
   jsonEncoder: false
-  database: szzn_admin
 
 rpc:
   host: 0.0.0.0

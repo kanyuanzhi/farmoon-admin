@@ -61,7 +61,7 @@ func (api *DishApi) List(c *gin.Context) {
 
 	var dishes []model.SysDish
 	if err := filterDb.Limit(listDishesRequest.PageSize).Offset((listDishesRequest.PageIndex - 1) * listDishesRequest.PageSize).
-		Order("id").Find(&dishes).Error; err != nil {
+		Order("sort, updated_at asc").Find(&dishes).Error; err != nil {
 		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return
@@ -194,6 +194,9 @@ func (api *DishApi) Add(c *gin.Context) {
 	}
 
 	dish := model.SysDish{
+		FXModel: global.FXModel{
+			Sort: 1,
+		},
 		Name:    addDishRequest.Name,
 		Cuisine: addDishRequest.Cuisine,
 		UUID:    uuid.New(),
@@ -231,6 +234,92 @@ func (api *DishApi) Add(c *gin.Context) {
 	}
 
 	response.SuccessMessageData(c, addDishResponse, "添加成功")
+}
+
+func (api *DishApi) Copy(c *gin.Context) {
+	var copyDishRequest request.CopyDish
+	if err := request.ShouldBindJSON(c, &copyDishRequest); err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	var dish model.SysDish
+	if err := global.FXDb.Where("id = ?", copyDishRequest.Id).First(&dish).Error; err != nil {
+		global.FXLogger.Error(err.Error())
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	dish.Id = 0
+	dish.CreatedAt = 0
+	dish.UpdatedAt = 0
+	dish.Name = dish.Name + "-副本"
+	dish.UUID = uuid.New()
+	dish.CustomStepsList = map[string][]map[string]interface{}{
+		uuid.New().String(): dish.Steps,
+		uuid.New().String(): dish.Steps,
+		uuid.New().String(): dish.Steps,
+	}
+
+	if err := global.FXDb.Create(&dish).Error; err != nil {
+		global.FXLogger.Error(err.Error())
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	copyDishResponse := response.CopyDish{
+		Dish: model.DishInfo{
+			Id:              dish.Id,
+			Image:           "data:image/png;base64," + base64.StdEncoding.EncodeToString(dish.Image),
+			Name:            dish.Name,
+			UUID:            dish.UUID,
+			Steps:           dish.Steps,
+			CustomStepsList: dish.CustomStepsList,
+			Cuisine:         dish.Cuisine,
+			IsOfficial:      dish.IsOfficial,
+			IsShared:        dish.IsShared,
+			IsMarked:        dish.IsMarked,
+		},
+	}
+
+	response.SuccessMessageData(c, copyDishResponse, "复制成功")
+}
+
+func (api *DishApi) Topping(c *gin.Context) {
+	var toppingDishRequest request.ToppingDish
+	if err := request.ShouldBindJSON(c, &toppingDishRequest); err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	topDish := model.SysDish{
+		FXModel: global.FXModel{
+			Id: toppingDishRequest.Id,
+		},
+	}
+
+	if err := global.FXDb.Model(&topDish).Update("sort", 1).Error; err != nil {
+		global.FXLogger.Error(err.Error())
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	var dishes []model.SysDish
+	if err := global.FXDb.Where("is_official", true).Not("id = ?", toppingDishRequest.Id).
+		Order("sort, updated_at asc").Select("id", "sort").Find(&dishes).Error; err != nil {
+		global.FXLogger.Error(err.Error())
+		response.ErrorMessage(c, err.Error())
+	}
+
+	for index, dish := range dishes {
+		if err := global.FXDb.Model(&dish).Update("sort", int64(index)+2).Error; err != nil {
+			global.FXLogger.Error(err.Error())
+			response.ErrorMessage(c, err.Error())
+			return
+		}
+	}
+
+	response.SuccessMessage(c, "置顶成功")
 }
 
 func (api *DishApi) UpdateImage(c *gin.Context) {
@@ -275,4 +364,13 @@ func (api *DishApi) UpdateImage(c *gin.Context) {
 	updatedImage := "data:image/png;base64," + base64.StdEncoding.EncodeToString(dish.Image)
 
 	response.SuccessMessageData(c, updatedImage, "更新菜谱图片成功")
+}
+
+func (api *DishApi) getOfficialDishNumber(c *gin.Context) (int64, error) {
+	var officialDishNumber int64
+	if err := global.FXDb.Model(&model.SysDish{}).Where("is_official", true).Count(&officialDishNumber).Error; err != nil {
+		response.ErrorMessage(c, err.Error())
+		return 0, err
+	}
+	return officialDishNumber, nil
 }

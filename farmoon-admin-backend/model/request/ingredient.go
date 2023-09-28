@@ -24,3 +24,7 @@ type UpdateIngredient struct {
 type DeleteIngredient struct {
 	Id uint `json:"id"`
 }
+
+type ToppingIngredient struct {
+	Id uint `json:"id"`
+}

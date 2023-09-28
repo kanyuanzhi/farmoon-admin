@@ -32,3 +32,11 @@ type AddDish struct {
 	Cuisine uint                     `json:"cuisine"`
 	Steps   []map[string]interface{} `json:"steps"`
 }
+
+type CopyDish struct {
+	Id uint `json:"id"`
+}
+
+type ToppingDish struct {
+	Id uint `json:"id"`
+}

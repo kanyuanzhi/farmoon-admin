@@ -87,7 +87,7 @@ func (server *DataUpdate) FetchOfficialDishes(c context.Context, req *pb.FetchOf
 	return res, nil
 }
 
-func (server *DataUpdate) FetchCuisines(c context.Context, req *pb.FetchIngredientsRequest) (*pb.FetchIngredientsResponse, error) {
+func (server *DataUpdate) FetchIngredients(c context.Context, req *pb.FetchIngredientsRequest) (*pb.FetchIngredientsResponse, error) {
 	var ingredients []model.SysIngredient
 	if err := global.FXDb.Find(&ingredients).Error; err != nil {
 		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
