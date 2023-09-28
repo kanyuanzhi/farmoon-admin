@@ -127,11 +127,12 @@ func (server *DataUpdate) SynchronizePersonalDishes(c context.Context, req *pb.S
 		return nil, err
 	}
 
-	var remoteNeedDeleteDishesNumber int64
-	if err := global.FXDb.Where("uuid in ?", localDeletedDishUUIDs).Delete(&model.SysDish{}).Count(&remoteNeedDeleteDishesNumber).Error; err != nil {
+	var deletedDishes []model.SysDish
+	if err := global.FXDb.Clauses(clause.Returning{}).Where("uuid in ?", localDeletedDishUUIDs).Delete(&deletedDishes).Error; err != nil {
 		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
+	remoteNeedDeleteDishesNumber := len(deletedDishes)
 
 	var userDeletedDishes []model.SysUserDeletedDish
 	for _, dishUUID := range localDeletedDishUUIDs {
@@ -234,7 +235,7 @@ func (server *DataUpdate) SynchronizePersonalDishes(c context.Context, req *pb.S
 	res := &pb.SynchronizePersonalDishesResponse{
 		RemoteNeedAddDishUuidsJson:    remoteNeedAddDishUUIDsBytes,
 		RemoteNeedUpdateDishUuidsJson: remoteNeedUpdateDishUUIDsBytes,
-		RemoteNeedDeleteDishesNumber:  remoteNeedDeleteDishesNumber,
+		RemoteNeedDeleteDishesNumber:  int64(remoteNeedDeleteDishesNumber),
 		LocalNeedAddDishesJson:        localNeedAddDishesBytes,
 		LocalNeedUpdateDishesJson:     localNeedUpdateDishesBytes,
 		LocalNeedDeleteDishUuidsJson:  localNeedDeleteDishUUIDsBytes,
