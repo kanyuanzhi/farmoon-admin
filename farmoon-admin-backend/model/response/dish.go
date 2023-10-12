@@ -25,3 +25,15 @@ type UpdateDishWithSteps struct {
 type CopyDish struct {
 	Dish model.DishInfo `json:"dish"`
 }
+
+type ExportSteps struct {
+	Dishes []model.DishInfo `json:"dishes"`
+}
+
+type ListOwners struct {
+	Owners []string `json:"owners"`
+}
+
+type GetQrCode struct {
+	QrCode []byte `json:"qrCode"`
+}

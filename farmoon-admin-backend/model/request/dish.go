@@ -4,6 +4,9 @@ type CountDishes struct {
 	Filter              string `json:"filter" form:"filter"`
 	EnableCuisineFilter bool   `json:"enableCuisineFilter" form:"enableCuisineFilter"`
 	CuisineFilter       string `json:"cuisineFilter" form:"cuisineFilter"`
+	EnableOwnerFilter   bool   `json:"enableOwnerFilter" form:"enableOwnerFilter"`
+	OwnerFilter         string `json:"ownerFilter" form:"ownerFilter"`
+	IsOfficial          bool   `json:"isOfficial" form:"isOfficial"`
 }
 
 type ListDishes struct {
@@ -39,4 +42,21 @@ type CopyDish struct {
 
 type ToppingDish struct {
 	Id uint `json:"id"`
+}
+
+type ExportSteps struct {
+	Ids []uint `json:"ids"`
+}
+
+type ListOwners struct {
+	PageIndex int `json:"pageIndex" form:"pageIndex"`
+	PageSize  int `json:"pageSize" form:"pageSize"`
+}
+
+type AddToOfficials struct {
+	Id uint `json:"id"`
+}
+
+type GetDishQrCode struct {
+	Id uint `json:"id" form:"id"`
 }

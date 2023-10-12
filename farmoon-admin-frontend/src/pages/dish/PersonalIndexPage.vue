@@ -20,42 +20,27 @@
         <q-checkbox dense v-model="scope.selected"/>
       </template>
       <template v-slot:top="scope">
-        <q-btn label="添加菜品" color="primary" @click="router.push('/dish/edit');"/>
-        <template v-if="!isDeleteInBatch">
-          <q-btn v-if="!isExportInBatch" class="q-ml-sm" label="批量导出菜品" color="primary"
-                 @click.prevent="isExportInBatch=true"/>
-          <template v-else>
-            <q-btn outline class="q-ml-sm" label="取消导出" color="grey-6" @click="exportCancel"/>
-            <q-btn outline class="q-ml-sm" label="确认导出" color="positive"
-                   @click="exportSteps(selectedRows)"/>
-          </template>
+        <q-btn v-if="!isExportInBatch" class="q-ml-sm" label="批量导出菜品" color="primary"
+               @click.prevent="isExportInBatch=true"/>
+        <template v-else>
+          <q-btn outline class="q-ml-sm" label="取消导出" color="grey-6" @click="exportCancel"/>
+          <q-btn outline class="q-ml-sm" label="确认导出" color="positive"
+                 @click="exportSteps(selectedRows)"/>
         </template>
-        <template v-if="!isExportInBatch">
-          <q-btn v-if="!isDeleteInBatch" class="q-ml-sm" label="批量删除菜品" color="grey-6"
-                 @click.prevent="isDeleteInBatch=true"/>
-          <template v-else>
-            <q-btn outline class="q-ml-sm" label="取消删除" color="grey-6" @click="deleteCancel"/>
-            <q-btn outline class="q-ml-sm" label="确认删除" color="negative"
-                   @click="deleteRows(selectedRows)"/>
-          </template>
-        </template>
-
         <q-space/>
-
-        <q-toggle v-model="enableCuisineFilter" @update:model-value="onRequest(scope)"></q-toggle>
+        <q-toggle v-model="enableOwnerFilter" @update:model-value="onRequest(scope)"></q-toggle>
         <q-select
             dense
             options-dense
             clearable
-            multiple
-            v-model="cuisineFilter"
-            :options="cuisineOptions"
-            label="筛选菜系"
+            v-model="ownerFilter"
+            :options="ownerOptions"
+            label="筛选用户"
             style="width: 300px"
-            :disable="!enableCuisineFilter"
+            :disable="!enableOwnerFilter"
             @update:model-value="onRequest(scope)"
         />
-        <q-input dense class="q-ml-md" debounce="300" v-model="filter" placeholder="模糊搜索(名称)">
+        <q-input dense class="q-ml-md" debounce="300" v-model="filter" placeholder="模糊搜索(名称或用户)">
           <template v-slot:append>
             <q-icon name="search"/>
           </template>
@@ -95,25 +80,17 @@
             <q-popup-edit v-model="props.row.cuisine" buttons label-set="确认" label-cancel="取消" v-slot="scope"
                           @update:model-value="updateRow(props.row)">
               <q-option-group
-                  :options="cuisineOptions"
+                  :options="ownerOptions"
                   v-model="scope.value"
               />
             </q-popup-edit>
           </q-td>
-          <q-td key="customSteps" :props="props">
-            {{ }}
-            <!--            <q-popup-edit v-model="props.row.mobile" buttons label-set="确认" label-cancel="取消" v-slot="scope"-->
-            <!--                          @update:model-value="updateRow(props.row)">-->
-            <!--              <q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set"/>-->
-            <!--            </q-popup-edit>-->
+          <q-td key="owner" :props="props">
+            {{ props.row.owner }}
           </q-td>
           <q-td key="operate" :props="props">
-            <q-btn dense round flat icon="edit" size="sm" color="teal-6" @click="editDish(props.row)">
-              <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">编辑</q-tooltip>
-            </q-btn>
-            <q-btn class="q-ml-sm" dense round flat icon="content_copy" size="sm" color="teal-6"
-                   @click="copyRow(props.row)">
-              <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">复制</q-tooltip>
+            <q-btn dense round flat icon="add" size="sm" color="teal-6" @click="addToOfficials(props.row)">
+              <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">添加至官方菜品</q-tooltip>
             </q-btn>
             <q-btn class="q-ml-sm" dense round flat icon="qr_code" size="sm" color="teal-6"
                    @click="exportQrCode(props.row)">
@@ -122,14 +99,6 @@
             <q-btn class="q-ml-sm" dense round flat icon="text_snippet" size="sm" color="teal-6"
                    @click="exportSteps([props.row])">
               <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">导出步骤</q-tooltip>
-            </q-btn>
-            <q-btn class="q-ml-sm" dense round flat icon="publish" size="sm" color="primary"
-                   @click="toppingRow(props.row)">
-              <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">置顶</q-tooltip>
-            </q-btn>
-            <q-btn class="q-ml-sm" dense round flat icon="delete" size="sm" color="grey-6"
-                   @click="deleteRows([props.row])">
-              <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">删除</q-tooltip>
             </q-btn>
           </q-td>
         </q-tr>
@@ -140,21 +109,21 @@
 </template>
 
 <script setup>
-import { onBeforeMount, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { deleteAPI, getAPI, postAPI, putAPI } from "src/api";
 import { Dialog, Notify } from "quasar";
 import { remove } from "lodash";
 import DishImageUploader from "pages/dish/components/DishImageUploader.vue";
-import { getCuisineInfo } from "pages/dish/index";
+import { getCuisineInfo, getOwners } from "pages/dish/index";
 import { useDishStore } from "stores/dish";
 import { useRouter } from "vue-router";
 import { saveAs } from "file-saver";
 
-const cuisineOptions = ref([]);
+const ownerOptions = ref([]);
 const cuisineMap = ref({});
 
-const enableCuisineFilter = ref(false);
-const cuisineFilter = ref([]);
+const enableOwnerFilter = ref(false);
+const ownerFilter = ref("");
 
 const filter = ref("");
 const isDeleteInBatch = ref(false);
@@ -171,7 +140,7 @@ const columns = [
   { name: "image", align: "center", label: "图片", field: "image", headerStyle: "width: 10%" },
   { name: "name", required: true, align: "center", label: "名称", field: "name", headerStyle: "width: 20%" },
   { name: "cuisine", align: "center", label: "菜系", field: "cuisine", headerStyle: "width: 10%" },
-  { name: "customSteps", align: "center", label: "口味", field: "customSteps", headerStyle: "width: 20%" },
+  { name: "owner", align: "center", label: "用户", field: "owner", headerStyle: "width: 20%" },
   { name: "operate", align: "center", label: "操作", headerStyle: "width: 15%" },
 ];
 
@@ -200,9 +169,10 @@ const dishImageUploader = ref(null);
 
 onMounted(async () => {
   loading.value = true;
-  const { options, map } = await getCuisineInfo();
-  cuisineOptions.value = options;
+  const { map } = await getCuisineInfo();
   cuisineMap.value = map;
+  const { options } = await getOwners();
+  ownerOptions.value = options;
   await getRowsNumber();
   await getRows(defaultPageIndex, defaultPageSize);
   loading.value = false;
@@ -226,9 +196,9 @@ const getRowsNumber = async () => {
   const { data } = await getAPI("/private/dish/count",
       {
         filter: filter.value.trim(),
-        enableCuisineFilter: enableCuisineFilter.value,
-        cuisineFilter: cuisineFilter.value?.map((val) => val.value).join(","),
-        isOfficial: true,
+        enableOwnerFilter: enableOwnerFilter.value,
+        ownerFilter: ownerFilter.value?.value,
+        isOfficial: false,
       });
   if (data.count !== undefined) {
     pagination.value.rowsNumber = data.count;
@@ -242,9 +212,9 @@ const getRows = async (pageIndex, pageSize) => {
     pageIndex: pageIndex,
     pageSize: pageSize,
     filter: filter.value.trim(),
-    enableCuisineFilter: enableCuisineFilter.value,
-    cuisineFilter: cuisineFilter.value?.map((val) => val.value).join(","),
-    isOfficial: true,
+    enableOwnerFilter: enableOwnerFilter.value,
+    ownerFilter: ownerFilter.value?.value,
+    isOfficial: false,
   });
   if (data.dishes !== undefined) {
     rows.value.splice(0, rows.value.length, ...data.dishes);
@@ -298,11 +268,11 @@ const deleteRows = async (selectedRows) => {
   });
 };
 
-const copyRow = async (row) => {
+const addToOfficials = async (row) => {
   try {
-    const { message, data } = await postAPI("private/dish/copy", { id: row.id });
+    const { message } = await postAPI("private/dish/add-to-officials", { id: row.id });
     Notify.create(message);
-    await onRequest(table.value);
+    // await onRequest(table.value);
     // rows.value.push(data.dish);
   } catch (e) {
     console.log(e.toString());

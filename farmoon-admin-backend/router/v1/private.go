@@ -34,6 +34,10 @@ func InitPrivateRouter(routerGroup *gin.RouterGroup) {
 	routerGroup.POST("dish/copy", dishApi.Copy)
 	routerGroup.PUT("dish/update-with-steps", dishApi.UpdateWithSteps)
 	routerGroup.PUT("dish/topping", dishApi.Topping)
+	routerGroup.POST("dish/export-steps", dishApi.ExportSteps)
+	routerGroup.GET("dish/list-owners", dishApi.ListOwners)
+	routerGroup.POST("dish/add-to-officials", dishApi.AddToOfficials)
+	routerGroup.GET("dish/get-qr-code", dishApi.GetQrCode)
 
 	seasoningApi := &private.SeasoningApi{}
 	routerGroup.GET("seasoning/list", seasoningApi.List)

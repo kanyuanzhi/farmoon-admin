@@ -32,3 +32,17 @@ export async function getIngredientTypeInfo () {
   }
   return { options: ingredientTypeOptions, map: ingredientTypeMap }
 }
+
+export async function getOwners () {
+  const ownerOptions = []
+  try {
+    const { data } = await getAPI('private/dish/list-owners')
+    const owners = data.owners
+    owners.forEach(owner => {
+      ownerOptions.push({ label: owner, value: owner })
+    })
+  } catch (e) {
+    console.log(e)
+  }
+  return { options: ownerOptions }
+}

@@ -8,7 +8,7 @@ import (
 type SysDish struct {
 	global.FXModel
 	Name            string                              `json:"name" gorm:"comment:菜品名称;"`
-	UUID            uuid.UUID                           `json:"uuid" gorm:"comment:唯一标识符;not null;uniqueIndex;"`
+	UUID            uuid.UUID                           `json:"uuid" gorm:"comment:唯一标识符;not null;"`
 	Steps           []map[string]interface{}            `json:"steps" gorm:"json;comment:步骤;type:json"`
 	CustomStepsList map[string][]map[string]interface{} `json:"customStepsList" gorm:"json;comment:口味步骤;type:json"`
 	Image           []byte                              `json:"image" gorm:"comment:菜品图像;"`

@@ -57,11 +57,11 @@ func (server *DataUpdate) FetchOfficialDishes(c context.Context, req *pb.FetchOf
 	var localNeedAddDishes []model.SysDish
 	var localNeedUpdateDishes []model.SysDish
 
-	if err := global.FXDb.Where("uuid in ?", localNeedAddDishUUIDs).Find(&localNeedAddDishes).Error; err != nil {
+	if err := global.FXDb.Where("uuid in ?", localNeedAddDishUUIDs).Omit("id").Find(&localNeedAddDishes).Error; err != nil {
 		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
-	if err := global.FXDb.Where("uuid in ?", localNeedUpdateDishUUIDs).Find(&localNeedUpdateDishes).Error; err != nil {
+	if err := global.FXDb.Where("uuid in ?", localNeedUpdateDishUUIDs).Omit("id").Find(&localNeedUpdateDishes).Error; err != nil {
 		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
@@ -178,7 +178,7 @@ func (server *DataUpdate) SynchronizePersonalDishes(c context.Context, req *pb.S
 	var localNeedDeleteDishUUIDs []uuid.UUID
 
 	var remoteDishes []model.SysDish
-	if err := global.FXDb.Where("owner = ?", req.GetUserSerialNumber()).Select("uuid", "updated_at").
+	if err := global.FXDb.Where("is_official = ? AND owner = ?", false, req.GetUserSerialNumber()).Select("uuid", "updated_at").
 		Find(&remoteDishes).Error; err != nil {
 		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
@@ -217,11 +217,11 @@ func (server *DataUpdate) SynchronizePersonalDishes(c context.Context, req *pb.S
 		}
 	}
 
-	if err := global.FXDb.Where("uuid in ?", localNeedAddDishUUIDs).Find(&localNeedAddDishes).Error; err != nil {
+	if err := global.FXDb.Where("uuid in ?", localNeedAddDishUUIDs).Omit("id").Find(&localNeedAddDishes).Error; err != nil {
 		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}
-	if err := global.FXDb.Where("uuid in ?", localNeedUpdateDishUUIDs).Find(&localNeedUpdateDishes).Error; err != nil {
+	if err := global.FXDb.Where("uuid in ?", localNeedUpdateDishUUIDs).Omit("id").Find(&localNeedUpdateDishes).Error; err != nil {
 		global.FXLogger.Error(global.FXConfig.System.RPCErrorMessage, zap.Any("err", err.Error()))
 		return nil, err
 	}

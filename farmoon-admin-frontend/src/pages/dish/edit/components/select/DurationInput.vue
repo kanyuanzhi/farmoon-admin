@@ -46,8 +46,6 @@ const emits = defineEmits(["update"]);
 const min = ref(floor(props.duration / 60));
 const sec = ref(props.duration % 60);
 
-console.log(props.duration)
-
 watch(min, (v) => {
   emits("update", v * 60 + sec.value);
 });

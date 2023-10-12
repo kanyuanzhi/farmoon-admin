@@ -63,8 +63,9 @@ func GenerateUserQueryCondition(filter string, enableGenderFilter bool, genderFi
 	return filterDb, nil
 }
 
-func GenerateDishQueryCondition(filter string, enableCuisineFilter bool, cuisineFilter []string) (*gorm.DB, error) {
-	filterDb := global.FXDb.Model(&model.SysDish{}).Where("is_official = ?", true)
+func GenerateDishQueryCondition(filter string, enableCuisineFilter bool, cuisineFilter []string,
+	enableOwnerFilter bool, ownerFilter string, isOfficial bool) (*gorm.DB, error) {
+	filterDb := global.FXDb.Model(&model.SysDish{}).Where("is_official = ?", isOfficial)
 
 	if enableCuisineFilter {
 		var cuisineFilterUint []uint
@@ -75,9 +76,13 @@ func GenerateDishQueryCondition(filter string, enableCuisineFilter bool, cuisine
 		filterDb = filterDb.Where("cuisine in ?", cuisineFilterUint)
 	}
 
+	if enableOwnerFilter {
+		filterDb = filterDb.Where("owner = ?", ownerFilter)
+	}
+
 	if filter != "" {
 		likeParam := "%" + filter + "%"
-		filterDb = filterDb.Where("name LIKE ?", likeParam)
+		filterDb = filterDb.Where("name LIKE ? or owner LIKE ?", likeParam, likeParam)
 	}
 
 	return filterDb, nil

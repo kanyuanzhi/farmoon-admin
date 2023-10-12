@@ -125,11 +125,20 @@ export const asyncRoutes = [
     component: MainLayout,
     children: [
       {
-        path: 'display',
-        name: 'dishDisplay',
+        path: 'officialDisplay',
+        name: 'dishOfficialDisplay',
         component: () => import('pages/dish/IndexPage.vue'),
         meta: {
-          title: '菜品浏览',
+          title: '官方菜品浏览',
+          icon: 'format_list_bulleted',
+          roles: ['admin', 'editor'],
+        },
+      }, {
+        path: 'personalDisplay',
+        name: 'dishPersonalDisplay',
+        component: () => import('pages/dish/PersonalIndexPage.vue'),
+        meta: {
+          title: '用户菜品浏览',
           icon: 'format_list_bulleted',
           roles: ['admin', 'editor'],
         },
