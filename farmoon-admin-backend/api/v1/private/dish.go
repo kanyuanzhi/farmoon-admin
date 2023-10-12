@@ -1,6 +1,7 @@
 package private
 
 import (
+	"bytes"
 	"encoding/base64"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -9,6 +10,8 @@ import (
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/model/request"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/model/response"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/utils"
+	"github.com/skip2/go-qrcode"
+	"image/png"
 	"strconv"
 	"strings"
 )
@@ -23,7 +26,7 @@ func (api *DishApi) Count(c *gin.Context) {
 	}
 
 	filterDb, err := request.GenerateDishQueryCondition(countDishesRequest.Filter, countDishesRequest.EnableCuisineFilter,
-		strings.Split(countDishesRequest.CuisineFilter, ","))
+		strings.Split(countDishesRequest.CuisineFilter, ","), countDishesRequest.EnableOwnerFilter, countDishesRequest.OwnerFilter, countDishesRequest.IsOfficial)
 	if err != nil {
 		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
@@ -52,7 +55,7 @@ func (api *DishApi) List(c *gin.Context) {
 	}
 
 	filterDb, err := request.GenerateDishQueryCondition(listDishesRequest.Filter, listDishesRequest.EnableCuisineFilter,
-		strings.Split(listDishesRequest.CuisineFilter, ","))
+		strings.Split(listDishesRequest.CuisineFilter, ","), listDishesRequest.EnableOwnerFilter, listDishesRequest.OwnerFilter, listDishesRequest.IsOfficial)
 	if err != nil {
 		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
@@ -77,6 +80,7 @@ func (api *DishApi) List(c *gin.Context) {
 			Steps:           dish.Steps,
 			CustomStepsList: dish.CustomStepsList,
 			Cuisine:         dish.Cuisine,
+			Owner:           dish.Owner,
 		})
 	}
 
@@ -373,4 +377,119 @@ func (api *DishApi) getOfficialDishNumber(c *gin.Context) (int64, error) {
 		return 0, err
 	}
 	return officialDishNumber, nil
+}
+
+func (api *DishApi) ExportSteps(c *gin.Context) {
+	var exportStepsRequest request.ExportSteps
+	if err := request.ShouldBindJSON(c, &exportStepsRequest); err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	var dishes []model.SysDish
+	if err := global.FXDb.Where("id in (?)", exportStepsRequest.Ids).Select("name", "steps").Find(&dishes).Error; err != nil {
+		global.FXLogger.Error(err.Error())
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	var dishInfos []model.DishInfo
+	for _, dish := range dishes {
+		dishInfos = append(dishInfos, model.DishInfo{Name: dish.Name, Steps: dish.Steps})
+	}
+
+	exportStepsResponse := response.ExportSteps{
+		Dishes: dishInfos,
+	}
+
+	response.SuccessData(c, exportStepsResponse)
+}
+
+func (api *DishApi) ListOwners(c *gin.Context) {
+	var listOwnersRequest request.ListOwners
+	if err := request.ShouldBindQuery(c, &listOwnersRequest); err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	var dishes []model.SysDish
+	if err := global.FXDb.Where("owner != ''").Select("owner").Group("owner").Find(&dishes).Error; err != nil {
+		global.FXLogger.Error(err.Error())
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	var owners []string
+	for _, dish := range dishes {
+		owners = append(owners, dish.Owner)
+	}
+
+	listOwnersResponse := response.ListOwners{
+		Owners: owners,
+	}
+
+	response.SuccessData(c, listOwnersResponse)
+}
+
+func (api *DishApi) AddToOfficials(c *gin.Context) {
+	var addToOfficialsRequest request.AddToOfficials
+	if err := request.ShouldBindJSON(c, &addToOfficialsRequest); err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	var dish model.SysDish
+	if err := global.FXDb.Where("id = ?", addToOfficialsRequest.Id).Omit("id", "updated_at", "created_at").
+		First(&dish).Error; err != nil {
+		global.FXLogger.Error(err.Error())
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	dish.UUID = uuid.New()
+	dish.IsOfficial = true
+	dish.IsShared = true
+	dish.IsMarked = false
+	dish.Sort = 1
+
+	if err := global.FXDb.Create(&dish).Error; err != nil {
+		global.FXLogger.Error(err.Error())
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	response.SuccessMessage(c, "已添加至官方菜品")
+}
+
+func (api *DishApi) GetQrCode(c *gin.Context) {
+	var getQrCodeRequest request.GetDishQrCode
+	if err := request.ShouldBindQuery(c, &getQrCodeRequest); err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	var dish model.SysDish
+	if err := global.FXDb.Where("id = ?", getQrCodeRequest.Id).Select("uuid").First(&dish).Error; err != nil {
+		global.FXLogger.Error(err.Error())
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	qr, err := qrcode.New("dishUUID::"+dish.UUID.String(), qrcode.Medium)
+	if err != nil {
+		global.FXLogger.Error(err.Error())
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, qr.Image(256)); err != nil {
+		global.FXLogger.Error(err.Error())
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	getQrCodeResponse := response.GetQrCode{QrCode: buf.Bytes()}
+
+	response.SuccessMessageData(c, getQrCodeResponse, "获取二维码成功")
 }
