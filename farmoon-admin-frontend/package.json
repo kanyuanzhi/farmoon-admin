@@ -13,6 +13,9 @@
     "build": "quasar build"
   },
   "dependencies": {
+    "@antv/l7": "^2.20.5",
+    "@antv/l7-maps": "^2.20.5",
+    "@antv/l7plot": "^0.5.7",
     "@quasar/extras": "^1.16.4",
     "@vuelidate/core": "^2.0.3",
     "@vuelidate/validators": "^2.0.4",
