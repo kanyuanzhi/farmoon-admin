@@ -86,7 +86,7 @@ onMounted(() => {
           }).
           style({
             opacity: 0.5,
-          }).active(true);
+          }).active({ color: "rgba(246,171,5,0.38)" });
       const lineLayer = new LineLayer().source(list).shape("line").color("rgb(246,171,5)").size(0.4).style({
         opacity: 1.0,
       });
