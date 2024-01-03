@@ -19,7 +19,9 @@ func RPC() {
 			zap.Any("err", fmt.Sprintf("RPC监听端口d%d失败：%v", global.FXConfig.RPC.Port, err)))
 	}
 
-	server := grpc.NewServer()
+	maxSize := 100 * 1024 * 1024
+
+	server := grpc.NewServer(grpc.MaxRecvMsgSize(maxSize), grpc.MaxSendMsgSize(maxSize))
 	pb.RegisterDataUpdaterServer(server, &rpcServer.DataUpdate{})
 	global.FXLogger.Info("RPC服务启动")
 

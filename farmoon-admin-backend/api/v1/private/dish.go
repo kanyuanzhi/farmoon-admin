@@ -11,6 +11,7 @@ import (
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/model/response"
 	"github.com/kanyuanzhi/farmoon-admin/farmoon-admin-backend/utils"
 	"github.com/skip2/go-qrcode"
+	"gorm.io/gorm/clause"
 	"image/png"
 	"strconv"
 	"strings"
@@ -175,6 +176,47 @@ func (api *DishApi) Delete(c *gin.Context) {
 	}
 
 	if err := global.FXDb.Delete(&dishes).Error; err != nil {
+		global.FXLogger.Error(err.Error())
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	response.SuccessMessage(c, "删除成功")
+}
+
+func (api *DishApi) DeletePersonals(c *gin.Context) {
+	var deleteDishesRequest request.DeleteDishes
+	if err := request.ShouldBindJSON(c, &deleteDishesRequest); err != nil {
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	var deletedDishes []model.SysDish
+	for _, id := range deleteDishesRequest.Ids {
+		deletedDishes = append(deletedDishes, model.SysDish{
+			FXModel: global.FXModel{
+				Id: id,
+			},
+		})
+	}
+
+	if err := global.FXDb.Clauses(clause.Returning{Columns: []clause.Column{{Name: "uuid"}, {Name: "owner"}}}).
+		Delete(&deletedDishes).Error; err != nil {
+		global.FXLogger.Error(err.Error())
+		response.ErrorMessage(c, err.Error())
+		return
+	}
+
+	var deletedPersonalDishes []model.SysUserDeletedDish
+	for _, dish := range deletedDishes {
+		deletedPersonalDishes = append(deletedPersonalDishes, model.SysUserDeletedDish{
+			UUID:  dish.UUID,
+			Owner: dish.Owner,
+		})
+	}
+
+	if err := global.FXDb.Clauses(clause.OnConflict{Columns: []clause.Column{{Name: "uuid"}}, DoNothing: true}).
+		Create(&deletedPersonalDishes).Error; err != nil {
 		global.FXLogger.Error(err.Error())
 		response.ErrorMessage(c, err.Error())
 		return

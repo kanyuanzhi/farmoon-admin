@@ -20,12 +20,23 @@
         <q-checkbox dense v-model="scope.selected"/>
       </template>
       <template v-slot:top="scope">
-        <q-btn v-if="!isExportInBatch" class="q-ml-sm" label="批量导出菜品" color="primary"
-               @click.prevent="isExportInBatch=true"/>
-        <template v-else>
-          <q-btn outline class="q-ml-sm" label="取消导出" color="grey-6" @click="exportCancel"/>
-          <q-btn outline class="q-ml-sm" label="确认导出" color="positive"
-                 @click="exportSteps(selectedRows)"/>
+        <template v-if="!isDeleteInBatch">
+          <q-btn v-if="!isExportInBatch" class="q-ml-sm" label="批量导出菜品" color="primary"
+                 @click.prevent="isExportInBatch=true"/>
+          <template v-else>
+            <q-btn outline class="q-ml-sm" label="取消导出" color="grey-6" @click="exportCancel"/>
+            <q-btn outline class="q-ml-sm" label="确认导出" color="positive"
+                   @click="exportSteps(selectedRows)"/>
+          </template>
+        </template>
+        <template v-if="!isExportInBatch">
+          <q-btn v-if="!isDeleteInBatch" class="q-ml-sm" label="批量删除菜品" color="grey-6"
+                 @click.prevent="isDeleteInBatch=true"/>
+          <template v-else>
+            <q-btn outline class="q-ml-sm" label="取消删除" color="grey-6" @click="deleteCancel"/>
+            <q-btn outline class="q-ml-sm" label="确认删除" color="negative"
+                   @click="deleteRows(selectedRows)"/>
+          </template>
         </template>
         <q-space/>
         <q-toggle v-model="enableOwnerFilter" @update:model-value="onRequest(scope)"></q-toggle>
@@ -99,6 +110,10 @@
             <q-btn class="q-ml-sm" dense round flat icon="text_snippet" size="sm" color="teal-6"
                    @click="exportSteps([props.row])">
               <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">导出步骤</q-tooltip>
+            </q-btn>
+            <q-btn class="q-ml-sm" dense round flat icon="delete" size="sm" color="grey-6"
+                   @click="deleteRows([props.row])">
+              <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">删除</q-tooltip>
             </q-btn>
           </q-td>
         </q-tr>
@@ -259,9 +274,10 @@ const deleteRows = async (selectedRows) => {
   }).onOk(async () => {
     try {
       const ids = selectedRows.map((row) => row.id);
-      const { message } = await deleteAPI("/private/dish/delete", { ids: ids });
+      const { message } = await deleteAPI("/private/dish/delete-personals", { ids: ids });
       await onRequest(table.value);
       Notify.create(message);
+      deleteCancel()
     } catch (e) {
       console.log(e.toString());
     }
@@ -342,6 +358,7 @@ const exportSteps = async (selectedRows) => {
         saveAs(strData, dish.name + ".txt");
       });
     }
+    exportCancel()
   } catch (e) {
     console.log(e.toString());
   }

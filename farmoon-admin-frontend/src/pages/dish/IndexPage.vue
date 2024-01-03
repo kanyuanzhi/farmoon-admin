@@ -292,6 +292,7 @@ const deleteRows = async (selectedRows) => {
       const { message } = await deleteAPI("/private/dish/delete", { ids: ids });
       await onRequest(table.value);
       Notify.create(message);
+      deleteCancel()
     } catch (e) {
       console.log(e.toString());
     }
@@ -372,6 +373,7 @@ const exportSteps = async (selectedRows) => {
         saveAs(strData, dish.name + ".txt");
       });
     }
+    exportCancel()
   } catch (e) {
     console.log(e.toString());
   }
